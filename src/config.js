@@ -1,20 +1,17 @@
-// Pengaturan yang perlu diisi tim sebelum rilis.
+﻿// Deep link chat Instagram resmi Pride Studio.
+export const INSTAGRAM_USERNAME = 'bypride.studio';
+export const instagramChatLink = 'https://ig.me/m/bypride.studio';
 
-// Nomor WhatsApp admin, format internasional tanpa tanda + (contoh: 6281234567890).
-export const ADMIN_WHATSAPP = '628XXXXXXXXXX';
-
-export const whatsappLink = (text = 'Halo Pride, saya butuh bantuan.') =>
-  `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(text)}`;
-
+// Kontak & sosial media
 export const CONTACT = {
-  instagram: '[AKUN INSTAGRAM]',
-  tiktok: '[AKUN TIKTOK]',
+  instagram: '@bypride.studio',
+  tiktok: '@bypride.studio',
+  whatsapp: '6281234567890',
+  email: 'hello@bypride.studio',
 };
 
-// Di production pakai env var VITE_API_URL.
-// Di lokal pakai proxy Vite (/api -> localhost:3000).
-export const DEMO_MODE = false;
+// Backend API
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api';
+// Demo mode
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
