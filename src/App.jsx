@@ -7,18 +7,15 @@ import Undangan from './pages/Undangan';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Tutorial from './pages/Tutorial';
+import Acara from './pages/Acara'; // <-- File baru dari temenmu
 import NotFound from './pages/NotFound';
 
-// Gulir ke atas saat pindah halaman, atau ke bagian #id bila ada.
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
     if (hash) {
       const el = document.getElementById(hash.slice(1));
-      if (el) {
-        el.scrollIntoView();
-        return;
-      }
+      if (el) { el.scrollIntoView(); return; }
     }
     window.scrollTo(0, 0);
   }, [pathname, hash]);
@@ -31,18 +28,16 @@ export default function App() {
       <ScrollManager />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/acara" element={<Acara />} /> {/* <-- Tambahan */}
         <Route path="/katalog" element={<Katalog />} />
-        <Route path="/undangan" element={<Undangan />} />
         <Route path="/tutorial" element={<Tutorial />} />
         <Route path="/masuk" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth>
-              <Dashboard />
-            </RequireAuth>
-          }
-        />
+        
+        {/* Rute lama & Rute baru untuk tamu (slug) */}
+        <Route path="/undangan" element={<Undangan />} />
+        <Route path="/u/:slug" element={<Undangan />} />
+
+        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

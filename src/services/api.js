@@ -22,71 +22,43 @@ async function request(path, { method = 'GET', body, auth = false } = {}) {
   return json.data ?? json;
 }
 
-// ============ MOCK (DEMO_MODE) ============
-const mock = {
-  async sendOtp(phone) {
-    console.log(`[DEMO] OTP untuk ${phone}: 123456`);
-    return { phone, expiresInMinutes: 5 };
-  },
-  async verifyOtp(phone, code) {
-    if (code.length !== 6) throw new Error('Kode harus 6 digit');
-    return { token: 'demo-token-' + phone, phone };
-  },
-  async me() {
-    const session = JSON.parse(localStorage.getItem('pride_session') || '{}');
-    return { phone: session.phone, name: 'Demo User' };
-  },
-  async listTemplates() { return TEMPLATES; },
-  async detailTemplate(id) { return TEMPLATES.find((t) => t.id === id); },
-
-  async listUndangan() { return []; },
-  async createUndangan(data) { return { id: 'demo', ...data }; },
-  async updateUndangan(id, data) { return { id, ...data }; },
-  async deleteUndangan() { return { ok: true }; },
-
-  // Guests / tamu
-  async listGuests() { return []; },
-  async addGuest(data) {
-    return { id: 'guest-' + Date.now(), ...data, rsvp: 'pending' };
-  },
-
-  // Wishes / ucapan
-  async listWishes() { return []; },
-  async submitRsvp(data) {
-    return { id: 'rsvp-' + Date.now(), ...data, createdAt: new Date().toISOString() };
-  },
-};
-
-// ============ REAL ============
+// ============ REAL API (Nyambung ke Backend) ============
 const real = {
-  sendOtp: (phone) => request('/auth/otp/send', { method: 'POST', body: { phone } }),
-  verifyOtp: (phone, code, meta = {}) =>
-    request('/auth/otp/verify', { method: 'POST', body: { phone, code, ...meta } }),
-  me: () => request('/auth/me', { auth: true }),
+ sendOtp: (phone) => request('/auth/otp/send', { method: 'POST', body: { phone } }),
+verifyOtp: (phone, code, meta = {}) => request('/auth/otp/verify', { method: 'POST', body: { phone, code, ...meta } }),
 
   listTemplates: (category) =>
-    request(
-      `/templates${
-        category && category !== 'Semua'
-          ? `?category=${encodeURIComponent(category)}`
-          : ''
-      }`,
-    ),
+    request(`/templates${category && category !== 'Semua' ? `?category=${encodeURIComponent(category)}` : ''}`),
   detailTemplate: (id) => request(`/templates/${id}`),
 
   listUndangan: () => request('/undangan', { auth: true }),
   createUndangan: (data) => request('/undangan', { method: 'POST', body: data, auth: true }),
-  updateUndangan: (id, data) =>
-    request(`/undangan/${id}`, { method: 'PUT', body: data, auth: true }),
+  updateUndangan: (id, data) => request(`/undangan/${id}`, { method: 'PUT', body: data, auth: true }),
   deleteUndangan: (id) => request(`/undangan/${id}`, { method: 'DELETE', auth: true }),
 
-  // Guests / tamu
-  listGuests: () => request('/guests', { auth: true }),
+  // GUESTS (Tamu)
+  listGuests: (undanganId) => request(`/guests?undanganId=${undanganId}`, { auth: true }),
   addGuest: (data) => request('/guests', { method: 'POST', body: data, auth: true }),
+  updateGuest: (id, data) => request(`/guests/${id}`, { method: 'PUT', body: data, auth: true }),
+  deleteGuest: (id) => request(`/guests/${id}`, { method: 'DELETE', auth: true }),
+  getGuestBySlug: (slug) => request(`/guests/by-slug/${slug}`),
+  rsvpBySlug: (data) => request('/guests/rsvp', { method: 'POST', body: data }),
 
-  // Wishes / ucapan (RSVP)
-  listWishes: () => request('/wishes'),
+  // Wishes (Ucapan)
+  listWishes: () => request('/rsvp'),
   submitRsvp: (data) => request('/rsvp', { method: 'POST', body: data }),
+};
+
+// ============ MOCK (Cuma buat jaga-jaga) ============
+const mock = {
+  async sendOtp(phone) { return { phone }; },
+  async verifyOtp(phone, code) { return { token: 'demo', phone }; },
+  async me() { return { phone: 'demo' }; },
+  async listTemplates() { return TEMPLATES; },
+  async listGuests() { return []; },
+  async addGuest(data) { return { id: '1', ...data }; },
+  async listWishes() { return []; },
+  async submitRsvp(data) { return { id: '1', ...data }; },
 };
 
 const impl = DEMO_MODE ? mock : real;
@@ -102,5 +74,9 @@ export const updateUndangan = impl.updateUndangan;
 export const deleteUndangan = impl.deleteUndangan;
 export const listGuests = impl.listGuests;
 export const addGuest = impl.addGuest;
+export const updateGuest = impl.updateGuest;
+export const deleteGuest = impl.deleteGuest;
+export const getGuestBySlug = impl.getGuestBySlug;
+export const rsvpBySlug = impl.rsvpBySlug;
 export const listWishes = impl.listWishes;
 export const submitRsvp = impl.submitRsvp;

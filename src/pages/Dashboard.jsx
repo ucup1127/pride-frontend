@@ -1,78 +1,111 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import Button from '../components/Button';
 import { TemplateCover } from '../components/TemplateCard';
 import { findTemplate } from '../data/templates';
 import { useAuth } from '../auth';
-import { addGuest, listGuests, listWishes } from '../services/api';
+import { 
+  listUndangan, 
+  createUndangan, 
+  addGuest, 
+  listGuests 
+} from '../services/api';
 
 const MENU = ['Ringkasan', 'Undangan saya', 'Daftar tamu', 'RSVP & ucapan', 'Pengaturan'];
-
-const STATUS_CLASS = {
-  Hadir: 'status--yes',
-  'Tidak hadir': 'status--no',
-  'Belum konfirmasi': 'status--wait',
-};
 
 export default function Dashboard() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
+  
+  const [undangan, setUndangan] = useState(null);
   const [guests, setGuests] = useState([]);
-  const [wishes, setWishes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
   const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ name: '', count: 1 });
+  const [draft, setDraft] = useState({ nama: '', jumlah: 1 });
   const [notice, setNotice] = useState('');
 
+  // 1. Inisialisasi: Cek undangan user, kalau belum ada, bikin baru
   useEffect(() => {
-    let active = true;
-    Promise.all([listGuests(), listWishes()]).then(([g, w]) => {
-      if (!active) return;
-      setGuests(g);
-      setWishes(w);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+    async function init() {
+      try {
+        const list = await listUndangan();
+        let currentUndangan = list[0]; // Ambil undangan pertama
 
-  const stats = useMemo(
-    () => [
-      { label: 'Total tamu', value: guests.length },
-      { label: 'Sudah membuka', value: guests.filter((g) => g.status !== 'Belum konfirmasi').length },
-      { label: 'Konfirmasi hadir', value: guests.filter((g) => g.status === 'Hadir').length },
-      { label: 'Ucapan masuk', value: wishes.length },
-    ],
-    [guests, wishes],
-  );
+        if (!currentUndangan) {
+          // Kalau belum punya, bikin baru (default pake template 'aurelia')
+          // Nanti bisa diganti ngambil dari query params ?template=...
+          const templateId = new URLSearchParams(window.location.search).get('template') || 'aurelia';
+          const t = findTemplate(templateId);
+          
+          currentUndangan = await createUndangan({
+            judul: `Undangan ${t.names}`,
+            templateId: t.id,
+            slug: `undangan-${Date.now()}`, // Slug unik
+            isPublic: true,
+            status: 'published'
+          });
+        }
+
+        setUndangan(currentUndangan);
+        
+        // Setelah dapet ID undangan, baru ambil daftar tamunya
+        const guestsList = await listGuests(currentUndangan.id);
+        setGuests(guestsList);
+      } catch (err) {
+        console.error("Gagal load dashboard:", err);
+        setNotice(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    init();
+  }, []);
 
   const flash = (text) => {
     setNotice(text);
     setTimeout(() => setNotice(''), 2500);
   };
 
+  // 2. Fungsi Tambah Tamu
   const onAdd = async (e) => {
     e.preventDefault();
-    const name = draft.name.trim();
-    if (!name) return;
-    const created = await addGuest({ name, count: Number(draft.count) || 1, status: 'Belum konfirmasi' });
-    setGuests((list) => [...list, created]);
-    setDraft({ name: '', count: 1 });
-    setAdding(false);
-    flash(`${name} ditambahkan.`);
-  };
-
-  const copyLink = async (guest) => {
-    const link = `${window.location.origin}/undangan?to=${encodeURIComponent(guest.name)}`;
+    const nama = draft.nama.trim();
+    if (!nama || !undangan) return;
+    
     try {
-      await navigator.clipboard.writeText(link);
-      flash(`Tautan untuk ${guest.name} disalin.`);
-    } catch {
-      flash(link);
+      const created = await addGuest({ 
+        undanganId: undangan.id, 
+        nama, 
+        jumlah: Number(draft.jumlah) || 1
+      });
+      setGuests((list) => [...list, created]);
+      setDraft({ nama: '', jumlah: 1 });
+      setAdding(false);
+      flash(`Tamu ${nama} berhasil ditambahkan!`);
+    } catch (err) {
+      flash(err.message);
     }
   };
 
-  const template = findTemplate('aurelia');
+  // 3. Fungsi Copy Link Tamu
+  const copyLink = async (guest) => {
+    // Link pakai slug tamu, arahin ke halaman undangan
+    const link = `${window.location.origin}/u/${guest.slug}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      flash(`Tautan untuk ${guest.nama} disalin!`);
+    } catch {
+      flash(link); // Fallback kalau browser gak izinin clipboard
+    }
+  };
+
+  if (loading) {
+    return <div style={{ padding: 50, textAlign: 'center' }}>Menyiapkan Dashboard...</div>;
+  }
+
+  const template = undangan ? findTemplate(undangan.templateId) : findTemplate('aurelia');
 
   return (
     <div className="dash">
@@ -91,10 +124,7 @@ export default function Dashboard() {
           <button
             type="button"
             className="dash__logout"
-            onClick={() => {
-              signOut();
-              navigate('/');
-            }}
+            onClick={() => { signOut(); navigate('/'); }}
           >
             Keluar
           </button>
@@ -114,29 +144,22 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {notice && (
-          <div className="toast" role="status">
-            {notice}
-          </div>
-        )}
+        {notice && <div className="toast" role="status">{notice}</div>}
 
+        {/* Stats */}
         <div className="grid grid--4 dash__stats">
-          {stats.map((s) => (
-            <div key={s.label} className="stat">
-              <span>{s.label}</span>
-              <strong>{s.value}</strong>
-            </div>
-          ))}
+          <div className="stat"><span>Total tamu</span><strong>{guests.length}</strong></div>
+          <div className="stat"><span>Sudah membuka</span><strong>0</strong></div>
+          <div className="stat"><span>Konfirmasi hadir</span><strong>{guests.filter(g => g.status === 'hadir').length}</strong></div>
+          <div className="stat"><span>Ucapan masuk</span><strong>0</strong></div>
         </div>
 
         <div className="dash__cols">
+          {/* Panel KIRI: Daftar Tamu */}
           <section className="panel dash__guests">
             <div className="row row--between">
               <h2 className="display">Daftar tamu</h2>
               <div className="row gap-10">
-                <Button size="sm" onClick={() => flash('Impor tamu segera hadir.')}>
-                  Impor tamu
-                </Button>
                 <Button variant="primary" size="sm" onClick={() => setAdding((v) => !v)}>
                   Tambah tamu
                 </Button>
@@ -144,31 +167,27 @@ export default function Dashboard() {
             </div>
 
             {adding && (
-              <form className="dash__add" onSubmit={onAdd}>
-                <div className="field">
-                  <label htmlFor="tamu-nama">Nama tamu</label>
+              <form className="dash__add" onSubmit={onAdd} style={{ display: 'flex', gap: 10, marginTop: 15, marginBottom: 15 }}>
+                <div className="field" style={{ flex: 1 }}>
                   <input
-                    id="tamu-nama"
                     className="input"
-                    value={draft.name}
-                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                    placeholder="Nama tamu"
+                    value={draft.nama}
+                    onChange={(e) => setDraft({ ...draft, nama: e.target.value })}
                     autoFocus
                   />
                 </div>
-                <div className="field dash__add-count">
-                  <label htmlFor="tamu-jumlah">Jumlah</label>
+                <div className="field" style={{ width: 80 }}>
                   <input
-                    id="tamu-jumlah"
                     type="number"
                     min="1"
                     className="input"
-                    value={draft.count}
-                    onChange={(e) => setDraft({ ...draft, count: e.target.value })}
+                    placeholder="Jml"
+                    value={draft.jumlah}
+                    onChange={(e) => setDraft({ ...draft, jumlah: e.target.value })}
                   />
                 </div>
-                <Button variant="primary" size="sm" type="submit">
-                  Simpan
-                </Button>
+                <Button variant="primary" size="sm" type="submit">Simpan</Button>
               </form>
             )}
 
@@ -183,52 +202,43 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {guests.map((g) => (
-                    <tr key={g.id}>
-                      <td>{g.name}</td>
-                      <td>
-                        <span className={`status ${STATUS_CLASS[g.status]}`}>{g.status}</span>
-                      </td>
-                      <td>{g.count}</td>
-                      <td>
-                        <button type="button" className="link-button" onClick={() => copyLink(g)}>
-                          Salin
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {guests.length === 0 ? (
+                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: 20 }}>Belum ada tamu.</td></tr>
+                  ) : (
+                    guests.map((g) => (
+                      <tr key={g.id}>
+                        <td>{g.nama}</td>
+                        <td><span className="status status--wait">{g.status}</span></td>
+                        <td>{g.jumlah}</td>
+                        <td>
+                          <button type="button" className="link-button" onClick={() => copyLink(g)}>
+                            Salin
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
           </section>
 
+          {/* Panel KANAN: Info Undangan */}
           <div className="dash__right">
             <section className="panel">
               <h2 className="display">Undanganmu</h2>
               <TemplateCover template={template} height={150} />
-              <div className="row gap-10">
-                <Button to="/undangan" size="sm" block>
-                  Lihat
-                </Button>
-                <Button variant="primary" size="sm" block onClick={() => flash('Penyuntingan segera hadir.')}>
-                  Sunting
+              <div className="row gap-10" style={{ marginTop: 15 }}>
+                <Button to={`/undangan?template=${template.id}`} size="sm" block>Lihat Demo</Button>
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  block 
+                  onClick={() => window.open(`/u/${undangan?.slug || 'demo'}`, '_blank')}
+                >
+                  Buka Link
                 </Button>
               </div>
-            </section>
-
-            <section className="panel">
-              <h2 className="display">Ucapan terbaru</h2>
-              <ul className="inv-wishes inv-wishes--plain">
-                {wishes.slice(0, 4).map((w) => (
-                  <li key={w.id}>
-                    <strong>{w.name}</strong>
-                    <span>{w.message}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/undangan" className="link-gold link-gold--start">
-                Lihat semua ucapan
-              </Link>
             </section>
           </div>
         </div>

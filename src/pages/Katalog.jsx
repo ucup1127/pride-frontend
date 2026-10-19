@@ -28,53 +28,85 @@ export default function Katalog() {
 
   return (
     <Layout>
-      <section className="container page-head">
-        <div className="eyebrow">Katalog</div>
-        <h1 className="display page-head__title">Temukan template yang paling cocok untukmu</h1>
-        <p className="lead page-head__text">
-          Semua template bisa diubah warna, font, foto, dan teksnya. Klik kartu untuk melihat
-          pratinjau.
+      {/* HEADER KATALOG */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 24px 30px' }}>
+        <div style={{ fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.15em', color: '#A98B5A', marginBottom: 12 }}>
+          KATALOG
+        </div>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.8rem', fontWeight: 500, color: '#1A1A1A', margin: '0 0 16px 0', lineHeight: 1.1 }}>
+          Temukan template yang paling cocok untukmu
+        </h1>
+        <p style={{ fontSize: '1.05rem', color: '#666', maxWidth: 600, lineHeight: 1.6 }}>
+          Semua template bisa diubah warna, font, foto, dan teksnya. Klik kartu untuk melihat pratinjau.
         </p>
       </section>
 
-      <section className="container filter-bar">
-        <div className="filter-bar__chips" role="group" aria-label="Filter jenis acara">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`chip${c === category ? ' is-active' : ''}`}
-              aria-pressed={c === category}
-              onClick={() => update('kategori', c)}
-            >
-              {c}
-            </button>
-          ))}
+      {/* FILTER BAR */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '24px' }}>
+          {/* Tombol Kategori */}
+          {CATEGORIES.map((c) => {
+            const isActive = c === category;
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => update('kategori', c)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '100px',
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  border: isActive ? '1px solid #1A1A1A' : '1px solid #E5E7EB',
+                  background: isActive ? '#1A1A1A' : '#FFF',
+                  color: isActive ? '#FFF' : '#374151',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {c}
+              </button>
+            );
+          })}
         </div>
-        <div className="filter-bar__search">
-          <label htmlFor="cari">Cari</label>
+
+        {/* Search Bar */}
+        <div style={{ display: 'flex', gap: '12px' }}>
           <input
-            id="cari"
             type="search"
-            className="input input--pill"
-            placeholder="Nama template"
+            placeholder="Cari nama template atau gaya..."
             value={query}
             onChange={(e) => update('cari', e.target.value)}
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '12px 20px',
+              borderRadius: '100px',
+              border: '1px solid #E5E7EB',
+              fontSize: '0.95rem',
+              outline: 'none',
+              background: '#FAFAFA',
+            }}
           />
         </div>
       </section>
 
-      <section className="container catalog">
+      {/* GRID TEMPLATE */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 80px' }}>
         {visible.length > 0 ? (
-          <div className="grid grid--4 grid--tall">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '30px',
+          }}>
             {visible.map((t) => (
               <TemplateCard key={t.id} template={t} />
             ))}
           </div>
         ) : (
-          <div className="empty">
-            <p className="display">Template tidak ditemukan</p>
-            <p className="hint">Coba kata kunci lain atau pilih jenis acara yang berbeda.</p>
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Template tidak ditemukan</h2>
+            <p style={{ color: '#666' }}>Coba kata kunci lain atau pilih jenis acara yang berbeda.</p>
           </div>
         )}
       </section>

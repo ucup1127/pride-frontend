@@ -1,12 +1,13 @@
 import Navbar from './Navbar';
 import Footer from './Footer';
 
-// Kerangka halaman publik: navbar di atas, footer di bawah.
 export default function Layout({ children }) {
   return (
-    <div className="layout">
+    <div className="min-h-screen flex flex-col bg-[#FBF8F2] font-sans">
       <Navbar />
-      <main className="layout__main">{children}</main>
+      <main className="flex-grow">
+        {children}
+      </main>
       <Footer />
     </div>
   );

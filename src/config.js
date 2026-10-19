@@ -10,8 +10,13 @@ export const CONTACT = {
   email: 'hello@bypride.studio',
 };
 
-// Backend API
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+// Backend API: Kalau di Vercel ambil dari env, kalau di lokal pakai proxy /api
+export const API_BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : '/api';
 
-// Demo mode
-export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
+// Paksa demo mode mati
+export const DEMO_MODE = false;
+
+export const whatsappLink = (text = 'Halo Pride, saya butuh bantuan.') =>
+  `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`;
