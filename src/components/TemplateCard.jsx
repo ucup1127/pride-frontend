@@ -1,12 +1,12 @@
 ﻿import { Link } from 'react-router-dom';
-import Button from './Button';
+import { motion } from 'framer-motion';
 
-export function TemplateCover({ template, height = 340, showTag = false }) {
+export function TemplateCover({ template, height = "100%", showTag = false }) {
   return (
     <div
       style={{
         position: 'relative',
-        background: template.img ? '#EAEAEA' : `linear-gradient(160deg, ${template.bg} 0%, ${template.fg} 130%)`,
+        background: `linear-gradient(160deg, ${template.bg} 0%, ${template.fg} 130%)`,
         color: '#FFF',
         height,
         width: '100%',
@@ -16,83 +16,31 @@ export function TemplateCover({ template, height = 340, showTag = false }) {
         justifyContent: 'flex-end',
       }}
     >
-      {/* Gambar Background */}
       {template.img && (
         <img
           src={template.img}
           alt=""
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            zIndex: 0,
-          }}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       )}
 
-      {/* Overlay Gradient Gelap biar teks kebaca */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.85) 100%)',
-        zIndex: 1,
-      }} />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/40 to-black/90" />
 
-      {/* Teks di dalam Gambar */}
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        padding: '24px 20px',
-        textAlign: 'center',
-        color: '#FFF',
-      }}>
-        <div style={{
-          fontSize: '0.65rem',
-          letterSpacing: '0.25em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.8)',
-          marginBottom: '8px',
-          fontWeight: 600,
-        }}>
+      <div className="relative z-10 p-4 md:p-6 text-center">
+        <div className="text-[0.6rem] tracking-[0.2em] uppercase text-white/80 mb-1 font-semibold">
           {template.event}
         </div>
-        <div style={{
-          fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-          fontSize: '1.8rem',
-          fontWeight: 500,
-          lineHeight: 1.1,
-          color: '#FFF',
-          marginBottom: '8px',
-        }}>
+        <div className="font-serif text-xl md:text-2xl text-white leading-tight mb-1">
           {template.names}
         </div>
-        <div style={{
-          fontSize: '0.75rem',
-          letterSpacing: '0.1em',
-          color: 'rgba(255,255,255,0.9)',
-        }}>
+        <div className="text-[0.65rem] md:text-xs tracking-widest text-white/70">
           {template.date}
         </div>
       </div>
 
-      {/* Tag (Populer, Baru, dll) */}
       {showTag && template.tag && (
-        <span style={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          zIndex: 3,
-          padding: '4px 12px',
-          background: 'rgba(255,255,255,0.95)',
-          color: '#1A1A1A',
-          fontSize: '0.7rem',
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-          borderRadius: 100,
-        }}>
+        <span className="absolute top-3 left-3 z-20 bg-white/95 text-[#1A1A1A] px-2 py-1 rounded-full text-[0.6rem] font-bold uppercase tracking-wider">
           {template.tag}
         </span>
       )}
@@ -100,56 +48,35 @@ export function TemplateCover({ template, height = 340, showTag = false }) {
   );
 }
 
-export default function TemplateCard({ template, actionPath }) {
+export default function TemplateCard({ template }) {
   return (
-    <article style={{
-      background: '#FFF',
-      borderRadius: '20px',
-      overflow: 'hidden',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-      display: 'flex',
-      flexDirection: 'column',
-    }}
-    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.1)'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; }}
-    >
-      <Link
-        to={`/undangan?template=${template.id}`}
-        aria-label={`Lihat contoh template ${template.name}`}
-        style={{ display: 'block', textDecoration: 'none' }}
+    <article className="group relative bg-white rounded-2xl overflow-hidden border border-[#EAEAEA] hover:shadow-2xl hover:border-[#A98B5A]/30 transition-all duration-300">
+      <Link 
+        to={`/undangan?template=${template.id}`} 
+        className="block aspect-[3/4] relative"
       >
-        {/* Ganti tinggi jadi 350px biar proporsional */}
-        <TemplateCover template={template} height={350} showTag />
-      </Link>
-      
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: '0 0 12px 0', color: '#1A1A1A', textAlign: 'center' }}>
-          {template.name}
-        </h3>
+        <TemplateCover template={template} showTag />
         
-        <div style={{ display: 'flex', gap: '8px' }}>
+        {/* Overlay Tombol (Muncul pas di-hover) */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 z-30 backdrop-blur-[2px]">
           <Link 
-            to={`/undangan?template=${template.id}`} 
-            style={{ 
-              flex: 1, padding: '8px 12px', borderRadius: '8px', textAlign: 'center', 
-              fontSize: '0.8rem', fontWeight: 500, textDecoration: 'none', 
-              background: '#F3F4F6', color: '#374151', border: '1px solid #E5E7EB'
-            }}
+            to={`/undangan?template=${template.id}`}
+            className="bg-white text-[#1A1A1A] px-6 py-2.5 rounded-full text-xs font-bold tracking-wide hover:scale-105 transition-transform"
           >
-            Lihat
+            LIHAT
           </Link>
           <Link 
-            to={actionPath || `/masuk?template=${template.id}`} 
-            style={{ 
-              flex: 1, padding: '8px 12px', borderRadius: '8px', textAlign: 'center', 
-              fontSize: '0.8rem', fontWeight: 500, textDecoration: 'none', 
-              background: '#1A1A1A', color: '#FFF', border: '1px solid #1A1A1A'
-            }}
+            to={`/masuk?template=${template.id}`}
+            className="bg-[#A98B5A] text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wide hover:scale-105 transition-transform"
           >
-            Pilih
+            PILIH
           </Link>
         </div>
+      </Link>
+      
+      <div className="p-3 text-center border-t border-[#EAEAEA]">
+        <h3 className="text-sm font-semibold text-[#1A1A1A]">{template.name}</h3>
+        <p className="text-[0.65rem] text-gray-500 uppercase tracking-widest">{template.style}</p>
       </div>
     </article>
   );

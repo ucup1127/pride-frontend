@@ -15,111 +15,150 @@ const LINKS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const { session } = useAuth();
 
-  // Fungsi buat nutup menu pas link diklik
   const handleLinkClick = () => setOpen(false);
 
-  return (
-    <header className="sticky top-0 z-50 bg-[#FBF8F2]/90 backdrop-blur-md border-b border-[#EAEAEA]">
-      <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Logo />
+  const isActive = (path) => {
+    if (path === '/') return pathname === '/' && !hash;
+    if (path.includes('#')) return false;
+    return pathname.startsWith(path);
+  };
 
-        {/* --- DESKTOP MENU --- */}
-        <nav className="hidden md:flex items-center gap-8">
-          {LINKS.map((l) => (
-            <Link
-              key={l.label}
-              to={l.to}
-              className={`text-sm font-medium transition-colors hover:text-[#A98B5A] ${
-                pathname === l.to ? 'text-[#A98B5A]' : 'text-[#555]'
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
-          <div className="flex items-center gap-4 ml-4">
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-40 bg-[#FBF8F2]/80 backdrop-blur-xl border-b border-[#EAEAEA]/50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <Logo />
+
+          {/* --- DESKTOP MENU --- */}
+          <nav className="hidden lg:flex items-center gap-8">
+            {LINKS.map((l) => {
+              const active = isActive(l.to);
+              return (
+                <Link
+                  key={l.label}
+                  to={l.to}
+                  className={`relative text-sm font-medium transition-colors hover:text-[#A98B5A] ${
+                    active ? 'text-[#1A1A1A]' : 'text-[#666]'
+                  }`}
+                >
+                  {l.label}
+                  {active && (
+                    <motion.div 
+                      layoutId="activeDot"
+                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#A98B5A] rounded-full"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+            
+            <div className="w-px h-6 bg-[#EAEAEA] mx-2" />
+
             {session ? (
-              <Link to="/dashboard" className="bg-[#1A1A1A] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-black transition-colors">
+              <Link to="/dashboard" className="bg-[#1A1A1A] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-black hover:shadow-lg transition-all">
                 Dashboard
               </Link>
             ) : (
-              <>
-                <Link to="/masuk" className="text-sm font-semibold text-[#1A1A1A] hover:text-[#A98B5A]">
+              <div className="flex items-center gap-5">
+                <Link to="/masuk" className="text-sm font-semibold text-[#1A1A1A] hover:text-[#A98B5A] transition-colors">
                   Masuk
                 </Link>
-                <Link to="/masuk" className="bg-[#1A1A1A] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-black transition-colors">
+                <Link to="/masuk" className="bg-[#1A1A1A] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-black hover:shadow-lg hover:-translate-y-0.5 transition-all">
                   Buat Undangan
                 </Link>
-              </>
+              </div>
             )}
-          </div>
-        </nav>
+          </nav>
 
-        {/* --- TOMBOL BURGER (HP) --- */}
-        <button 
-          className="md:hidden p-2 text-2xl z-50 relative" 
-          onClick={() => setOpen(!open)}
-          aria-label="Buka menu"
-        >
-          {/* Animasi ganti ikon dari garis tiga ke silang */}
-          <motion.div animate={{ rotate: open ? 90 : 0 }}>
-            {open ? '✕' : '☰'}
-          </motion.div>
-        </button>
-      </div>
+          {/* --- TOMBOL BURGER ASLI (Saat menu TERTUTUP) --- */}
+          {!open && (
+            <button 
+              className="lg:hidden p-2 text-[#1A1A1A] relative z-50"
+              onClick={() => setOpen(true)}
+              aria-label="Buka menu"
+            >
+              <div className="w-6 h-5 relative flex flex-col justify-between">
+                <span className="w-full h-0.5 bg-current" />
+                <span className="w-full h-0.5 bg-current" />
+                <span className="w-full h-0.5 bg-current" />
+              </div>
+            </button>
+          )}
+        </div>
+      </header>
 
-      {/* --- MOBILE MENU DROPDOWN (ANIMASI) --- */}
+      {/* --- MOBILE MENU (FULL SCREEN OVERLAY) --- */}
       <AnimatePresence>
         {open && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden absolute top-20 left-0 w-full bg-[#FBF8F2] border-b border-[#EAEAEA] shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-50 bg-[#FBF8F2] flex flex-col lg:hidden"
           >
-            <div className="flex flex-col p-6 gap-4">
+            {/* HEADER KHUSUS MENU MOBILE (Nyatu sama Logo) */}
+            <div className="h-20 px-6 flex items-center justify-between border-b border-[#EAEAEA]/50">
+              <Logo />
+              <button 
+                onClick={() => setOpen(false)}
+                className="p-2 text-[#1A1A1A] hover:text-[#A98B5A] transition-colors"
+                aria-label="Tutup menu"
+              >
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* LIST MENU */}
+            <div className="flex flex-col px-6 mt-6">
               {LINKS.map((l, i) => (
                 <motion.div
                   key={l.label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + (i * 0.05) }}
                 >
                   <Link 
                     to={l.to} 
                     onClick={handleLinkClick} 
-                    className="block text-lg font-medium text-[#1A1A1A] py-2 hover:text-[#A98B5A]"
+                    className="block text-3xl font-serif text-[#1A1A1A] py-5 border-b border-[#EAEAEA]/50 hover:text-[#A98B5A] transition-colors"
                   >
                     {l.label}
                   </Link>
                 </motion.div>
               ))}
-              
-              <hr className="border-[#EAEAEA] my-2" />
-              
-              <div className="flex flex-col gap-3">
-                {session ? (
-                  <Link to="/dashboard" onClick={handleLinkClick} className="bg-[#1A1A1A] text-white px-6 py-3.5 rounded-full text-center font-semibold">
-                    Dashboard
-                  </Link>
-                ) : (
-                  <>
-                    <Link to="/masuk" onClick={handleLinkClick} className="text-center font-semibold py-2 text-[#1A1A1A]">
-                      Masuk
-                    </Link>
-                    <Link to="/masuk" onClick={handleLinkClick} className="bg-[#1A1A1A] text-white px-6 py-3.5 rounded-full text-center font-semibold">
-                      Buat Undangan
-                    </Link>
-                  </>
-                )}
-              </div>
             </div>
+            
+            {/* TOMBOL AKSI DI BAWAH */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.4 }}
+              className="mt-auto pb-12 px-6 flex flex-col gap-4"
+            >
+              {session ? (
+                <Link to="/dashboard" onClick={handleLinkClick} className="bg-[#1A1A1A] text-white px-6 py-4 rounded-full text-center font-semibold text-lg shadow-xl">
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link to="/masuk" onClick={handleLinkClick} className="bg-transparent border border-[#EAEAEA] text-[#1A1A1A] px-6 py-4 rounded-full text-center font-semibold text-lg hover:bg-white transition-colors">
+                    Masuk
+                  </Link>
+                  <Link to="/masuk" onClick={handleLinkClick} className="bg-[#1A1A1A] text-white px-6 py-4 rounded-full text-center font-semibold text-lg shadow-xl">
+                    Buat Undangan
+                  </Link>
+                </>
+              )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

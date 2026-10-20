@@ -13,3 +13,13 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 80px; /* Biar pas di-scroll, navbarnya gak nutupin judul */
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
