@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Tutorial from './pages/Tutorial';
 import Acara from './pages/Acara'; // <-- File baru dari temenmu
 import NotFound from './pages/NotFound';
+import Editor from './pages/Editor';
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -32,7 +33,7 @@ export default function App() {
         <Route path="/katalog" element={<Katalog />} />
         <Route path="/tutorial" element={<Tutorial />} />
         <Route path="/masuk" element={<Login />} />
-        
+        <Route path="/editor" element={<Editor />} />
         {/* Rute lama & Rute baru untuk tamu (slug) */}
         <Route path="/undangan" element={<Undangan />} />
         <Route path="/u/:slug" element={<Undangan />} />

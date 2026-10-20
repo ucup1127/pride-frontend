@@ -66,7 +66,7 @@ export default function TemplateCard({ template }) {
             LIHAT
           </Link>
           <Link 
-            to={`/masuk?template=${template.id}`}
+            to={`/editor?template=${template.id}`}
             className="bg-[#A98B5A] text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-wide hover:scale-105 transition-transform"
           >
             PILIH
