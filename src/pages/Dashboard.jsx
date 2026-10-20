@@ -1,61 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Logo from '../components/Logo';
-import Button from '../components/Button';
+import { Link } from 'react-router-dom';
 import { TemplateCover } from '../components/TemplateCard';
 import { findTemplate } from '../data/templates';
-import { useAuth } from '../auth';
-import { 
-  listUndangan, 
-  createUndangan, 
-  addGuest, 
-  listGuests 
-} from '../services/api';
-
-const MENU = ['Ringkasan', 'Undangan saya', 'Daftar tamu', 'RSVP & ucapan', 'Pengaturan'];
+import { listUndangan, createUndangan, listGuests } from '../services/api';
 
 export default function Dashboard() {
-  const { session, signOut } = useAuth();
-  const navigate = useNavigate();
-  
   const [undangan, setUndangan] = useState(null);
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ nama: '', jumlah: 1 });
-  const [notice, setNotice] = useState('');
 
-  // 1. Inisialisasi: Cek undangan user, kalau belum ada, bikin baru
   useEffect(() => {
     async function init() {
       try {
         const list = await listUndangan();
-        let currentUndangan = list[0]; // Ambil undangan pertama
+        let currentUndangan = list[0];
 
         if (!currentUndangan) {
-          // Kalau belum punya, bikin baru (default pake template 'aurelia')
-          // Nanti bisa diganti ngambil dari query params ?template=...
           const templateId = new URLSearchParams(window.location.search).get('template') || 'aurelia';
           const t = findTemplate(templateId);
           
           currentUndangan = await createUndangan({
             judul: `Undangan ${t.names}`,
             templateId: t.id,
-            slug: `undangan-${Date.now()}`, // Slug unik
             isPublic: true,
             status: 'published'
           });
         }
 
         setUndangan(currentUndangan);
-        
-        // Setelah dapet ID undangan, baru ambil daftar tamunya
         const guestsList = await listGuests(currentUndangan.id);
         setGuests(guestsList);
       } catch (err) {
         console.error("Gagal load dashboard:", err);
-        setNotice(err.message);
       } finally {
         setLoading(false);
       }
@@ -63,186 +39,81 @@ export default function Dashboard() {
     init();
   }, []);
 
-  const flash = (text) => {
-    setNotice(text);
-    setTimeout(() => setNotice(''), 2500);
-  };
-
-  // 2. Fungsi Tambah Tamu
-  const onAdd = async (e) => {
-    e.preventDefault();
-    const nama = draft.nama.trim();
-    if (!nama || !undangan) return;
-    
-    try {
-      const created = await addGuest({ 
-        undanganId: undangan.id, 
-        nama, 
-        jumlah: Number(draft.jumlah) || 1
-      });
-      setGuests((list) => [...list, created]);
-      setDraft({ nama: '', jumlah: 1 });
-      setAdding(false);
-      flash(`Tamu ${nama} berhasil ditambahkan!`);
-    } catch (err) {
-      flash(err.message);
-    }
-  };
-
-  // 3. Fungsi Copy Link Tamu
-  const copyLink = async (guest) => {
-    // Link pakai slug tamu, arahin ke halaman undangan
-    const link = `${window.location.origin}/u/${guest.slug}`;
-    try {
-      await navigator.clipboard.writeText(link);
-      flash(`Tautan untuk ${guest.nama} disalin!`);
-    } catch {
-      flash(link); // Fallback kalau browser gak izinin clipboard
-    }
-  };
-
-  if (loading) {
-    return <div style={{ padding: 50, textAlign: 'center' }}>Menyiapkan Dashboard...</div>;
-  }
+  if (loading) return <div className="text-center py-20 text-gray-500">Menyiapkan ringkasan...</div>;
 
   const template = undangan ? findTemplate(undangan.templateId) : findTemplate('aurelia');
 
   return (
-    <div className="dash">
-      <aside className="dash__side">
-        <Logo small />
-        <nav aria-label="Menu dashboard">
-          {MENU.map((label, i) => (
-            <a key={label} href="#konten" className={i === 0 ? 'is-active' : undefined}>
-              {label}
-            </a>
-          ))}
-        </nav>
-        <div className="dash__plan">
-          <strong>Paket Standard</strong>
-          <span>Aktif hingga [TANGGAL]</span>
-          <button
-            type="button"
-            className="dash__logout"
-            onClick={() => { signOut(); navigate('/'); }}
-          >
-            Keluar
-          </button>
+    <div className="space-y-6 md:space-y-8">
+      
+      {/* Statistik */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-xs md:text-sm text-gray-500 mb-1">Total Tamu</p>
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-800">{guests.length}</h3>
         </div>
-      </aside>
-
-      <main id="konten" className="dash__main">
-        <div className="row row--between dash__top">
-          <div className="stack gap-4">
-            <h1 className="display">Halo!</h1>
-            <span className="hint">
-              Ringkasan undanganmu hari ini. Masuk via WhatsApp +62 {session?.phone || '[NOMOR]'}.
-            </span>
-          </div>
-          <Button to="/katalog" variant="primary" size="sm">
-            + Undangan baru
-          </Button>
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-xs md:text-sm text-gray-500 mb-1">Hadir</p>
+          <h3 className="text-2xl md:text-3xl font-bold text-green-600">{guests.filter(g => g.status === 'hadir').length}</h3>
         </div>
-
-        {notice && <div className="toast" role="status">{notice}</div>}
-
-        {/* Stats */}
-        <div className="grid grid--4 dash__stats">
-          <div className="stat"><span>Total tamu</span><strong>{guests.length}</strong></div>
-          <div className="stat"><span>Sudah membuka</span><strong>0</strong></div>
-          <div className="stat"><span>Konfirmasi hadir</span><strong>{guests.filter(g => g.status === 'hadir').length}</strong></div>
-          <div className="stat"><span>Ucapan masuk</span><strong>0</strong></div>
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-xs md:text-sm text-gray-500 mb-1">Tidak Hadir</p>
+          <h3 className="text-2xl md:text-3xl font-bold text-red-500">{guests.filter(g => g.status === 'tidak_hadir').length}</h3>
         </div>
+        <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-xs md:text-sm text-gray-500 mb-1">Ucapan</p>
+          <h3 className="text-2xl md:text-3xl font-bold text-[#A98B5A]">0</h3>
+        </div>
+      </div>
 
-        <div className="dash__cols">
-          {/* Panel KIRI: Daftar Tamu */}
-          <section className="panel dash__guests">
-            <div className="row row--between">
-              <h2 className="display">Daftar tamu</h2>
-              <div className="row gap-10">
-                <Button variant="primary" size="sm" onClick={() => setAdding((v) => !v)}>
-                  Tambah tamu
-                </Button>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        
+        {/* Ringkasan Tamu Terbaru */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-gray-800">Tamu Terbaru</h2>
+              <Link to="/dashboard/guests" className="text-sm font-semibold text-[#A98B5A] hover:underline">Kelola Semua →</Link>
             </div>
-
-            {adding && (
-              <form className="dash__add" onSubmit={onAdd} style={{ display: 'flex', gap: 10, marginTop: 15, marginBottom: 15 }}>
-                <div className="field" style={{ flex: 1 }}>
-                  <input
-                    className="input"
-                    placeholder="Nama tamu"
-                    value={draft.nama}
-                    onChange={(e) => setDraft({ ...draft, nama: e.target.value })}
-                    autoFocus
-                  />
-                </div>
-                <div className="field" style={{ width: 80 }}>
-                  <input
-                    type="number"
-                    min="1"
-                    className="input"
-                    placeholder="Jml"
-                    value={draft.jumlah}
-                    onChange={(e) => setDraft({ ...draft, jumlah: e.target.value })}
-                  />
-                </div>
-                <Button variant="primary" size="sm" type="submit">Simpan</Button>
-              </form>
+            
+            {guests.length === 0 ? (
+              <div className="text-center py-10 bg-gray-50 rounded-xl">
+                <p className="text-gray-500 mb-4">Belum ada tamu yang ditambahkan.</p>
+                <Link to="/dashboard/guests" className="bg-[#1A1A1A] text-white px-5 py-2 rounded-lg text-sm font-medium">Mulai Tambah Tamu</Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {guests.slice(0, 5).map(g => (
+                  <div key={g.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50">
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm">{g.nama}</p>
+                      <p className="text-xs text-gray-500">{g.jumlah} orang</p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
+                      g.status === 'hadir' ? 'bg-green-100 text-green-700' : 
+                      g.status === 'tidak_hadir' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {g.status || 'Pending'}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
-
-            <div className="table-wrap">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Jumlah</th>
-                    <th scope="col">Tautan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {guests.length === 0 ? (
-                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: 20 }}>Belum ada tamu.</td></tr>
-                  ) : (
-                    guests.map((g) => (
-                      <tr key={g.id}>
-                        <td>{g.nama}</td>
-                        <td><span className="status status--wait">{g.status}</span></td>
-                        <td>{g.jumlah}</td>
-                        <td>
-                          <button type="button" className="link-button" onClick={() => copyLink(g)}>
-                            Salin
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Panel KANAN: Info Undangan */}
-          <div className="dash__right">
-            <section className="panel">
-              <h2 className="display">Undanganmu</h2>
-              <TemplateCover template={template} height={150} />
-              <div className="row gap-10" style={{ marginTop: 15 }}>
-                <Button to={`/undangan?template=${template.id}`} size="sm" block>Lihat Demo</Button>
-                <Button 
-                  variant="primary" 
-                  size="sm" 
-                  block 
-                  onClick={() => window.open(`/u/${undangan?.slug || 'demo'}`, '_blank')}
-                >
-                  Buka Link
-                </Button>
-              </div>
-            </section>
           </div>
         </div>
-      </main>
+
+        {/* Info Undangan */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Link Undangan</h2>
+            <div className="rounded-xl overflow-hidden mb-4 border border-gray-100">
+              <TemplateCover template={template} height={160} />
+            </div>
+            <button onClick={() => window.open(`/u/${undangan?.slug || 'demo'}`, '_blank')} className="w-full bg-[#1A1A1A] text-white py-3 rounded-xl font-semibold text-sm hover:bg-black transition-colors">Buka Link Undangan</button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
