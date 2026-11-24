@@ -2,93 +2,43 @@
 import Button from './Button';
 
 export function TemplateCover({ template, height = 340, showTag = false }) {
+  const design = template.design || 'editorial';
+
   return (
     <div
-      className="template-cover"
+      className={`template-cover template-cover--preview template-cover--${design}`}
       style={{
-        position: 'relative',
-        background: `linear-gradient(160deg, ${template.bg} 0%, ${template.fg} 130%)`,
-        color: '#FFF',
+        '--template-bg': template.bg,
+        '--template-fg': template.fg,
         height,
-        overflow: 'hidden',
       }}
     >
       {template.img && (
         <img
+          className="template-cover__image"
           src={template.img}
           alt=""
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            zIndex: 0,
-          }}
         />
       )}
 
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.80) 100%)',
-        zIndex: 1,
-      }} />
+      <div className="template-cover__overlay" />
+      <span className="template-cover__ornament" aria-hidden="true">✦</span>
 
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        height: '100%',
-        padding: '20px 18px',
-        textAlign: 'center',
-        color: '#FFF',
-      }}>
-        <div style={{
-          fontSize: '0.55rem',
-          letterSpacing: '0.28em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.9)',
-          marginBottom: '8px',
-        }}>
+      <div className="template-cover__content">
+        <div className="template-cover__event">
           {template.event}
         </div>
-        <div style={{
-          fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-          fontSize: '1.5rem',
-          fontWeight: 500,
-          lineHeight: 1.1,
-          color: '#FFF',
-          marginBottom: '6px',
-        }}>
+        <div className="template-cover__names">
           {template.names}
         </div>
-        <div style={{
-          fontSize: '0.6rem',
-          letterSpacing: '0.22em',
-          color: 'rgba(255,255,255,0.85)',
-        }}>
+        <div className="template-cover__date">
           {template.date}
         </div>
       </div>
 
       {showTag && (
-        <span style={{
-          position: 'absolute',
-          top: 12,
-          left: 12,
-          zIndex: 3,
-          padding: '4px 10px',
-          background: 'rgba(255,255,255,0.95)',
-          color: '#1A1A1A',
-          fontSize: '0.65rem',
-          fontWeight: 500,
-          letterSpacing: '0.06em',
-          borderRadius: 100,
-        }}>
+        <span className="template-cover__tag">
           {template.tag}
         </span>
       )}

@@ -1,36 +1,60 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Logo from '../components/Logo';
+import { Link } from 'react-router-dom';
 import Button from '../components/Button';
+import DashboardShell from '../components/DashboardShell';
 import { TemplateCover } from '../components/TemplateCard';
 import { findTemplate } from '../data/templates';
 import { useAuth } from '../auth';
-import { addGuest, listGuests, listWishes } from '../services/api';
+import { listGuests, listUndangan, listWishes } from '../services/api';
 
-const MENU = ['Ringkasan', 'Undangan saya', 'Daftar tamu', 'RSVP & ucapan', 'Pengaturan'];
-
-const STATUS_CLASS = {
-  Hadir: 'status--yes',
-  'Tidak hadir': 'status--no',
-  'Belum konfirmasi': 'status--wait',
+const ACCOUNT_PLAN = {
+  basic: 'Basic',
+  plus: 'Standard',
+  standard: 'Standard',
+  premium: 'Premium',
 };
 
 export default function Dashboard() {
-  const { session, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { session } = useAuth();
+  const [invitation, setInvitation] = useState(null);
   const [guests, setGuests] = useState([]);
   const [wishes, setWishes] = useState([]);
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ name: '', count: 1 });
-  const [notice, setNotice] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const paidPlan = localStorage.getItem('pride-paid-plan');
+  const accountName =
+    session?.user?.name ||
+    session?.user?.email?.split('@')[0] ||
+    session?.email?.split('@')[0] ||
+    session?.phone ||
+    'teman';
 
   useEffect(() => {
     let active = true;
-    Promise.all([listGuests(), listWishes()]).then(([g, w]) => {
-      if (!active) return;
-      setGuests(g);
-      setWishes(w);
-    });
+    async function loadDashboard() {
+      try {
+        const invitations = await listUndangan();
+        const currentInvitation = invitations[0] || null;
+        if (!active) return;
+        setInvitation(currentInvitation);
+
+        if (currentInvitation) {
+          const [guestList, wishList] = await Promise.all([
+            listGuests(currentInvitation.id),
+            listWishes(currentInvitation.id),
+          ]);
+          if (!active) return;
+          setGuests(guestList);
+          setWishes(wishList);
+        }
+      } catch (loadError) {
+        if (active) setError(loadError.message || 'Data dashboard gagal dimuat.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadDashboard();
     return () => {
       active = false;
     };
@@ -39,200 +63,107 @@ export default function Dashboard() {
   const stats = useMemo(
     () => [
       { label: 'Total tamu', value: guests.length },
-      { label: 'Sudah membuka', value: guests.filter((g) => g.status !== 'Belum konfirmasi').length },
-      { label: 'Konfirmasi hadir', value: guests.filter((g) => g.status === 'Hadir').length },
+      { label: 'Sudah merespons', value: guests.filter((guest) => guest.status !== 'pending').length },
+      { label: 'Konfirmasi hadir', value: guests.filter((guest) => guest.status === 'hadir').length },
       { label: 'Ucapan masuk', value: wishes.length },
     ],
     [guests, wishes],
   );
 
-  const flash = (text) => {
-    setNotice(text);
-    setTimeout(() => setNotice(''), 2500);
-  };
-
-  const onAdd = async (e) => {
-    e.preventDefault();
-    const name = draft.name.trim();
-    if (!name) return;
-    const created = await addGuest({ name, count: Number(draft.count) || 1, status: 'Belum konfirmasi' });
-    setGuests((list) => [...list, created]);
-    setDraft({ name: '', count: 1 });
-    setAdding(false);
-    flash(`${name} ditambahkan.`);
-  };
-
-  const copyLink = async (guest) => {
-    const link = `${window.location.origin}/undangan?to=${encodeURIComponent(guest.name)}`;
-    try {
-      await navigator.clipboard.writeText(link);
-      flash(`Tautan untuk ${guest.name} disalin.`);
-    } catch {
-      flash(link);
-    }
-  };
-
-  const template = findTemplate('aurelia');
+  const template = findTemplate(invitation?.templateId || 'aurelia');
+  const planName = ACCOUNT_PLAN[paidPlan] || paidPlan || 'Paket aktif';
 
   return (
-    <div className="dash">
-      <aside className="dash__side">
-        <Logo small />
-        <nav aria-label="Menu dashboard">
-          {MENU.map((label, i) => (
-            <a key={label} href="#konten" className={i === 0 ? 'is-active' : undefined}>
-              {label}
-            </a>
-          ))}
-        </nav>
-        <div className="dash__plan">
-          <strong>Paket Standard</strong>
-          <span>Aktif hingga [TANGGAL]</span>
-          <button
-            type="button"
-            className="dash__logout"
-            onClick={() => {
-              signOut();
-              navigate('/');
-            }}
-          >
-            Keluar
-          </button>
+    <DashboardShell activeMenu="ringkasan">
+      <header id="ringkasan" className="dash__top">
+        <div>
+          <div className="eyebrow">RUANG KERJA PRIDE · {planName}</div>
+          <h1 className="display">Halo, {accountName}.</h1>
+          <p>Kelola undangan, tamu, dan ucapan dalam satu tempat.</p>
         </div>
-      </aside>
+        <Button to="/katalog" variant="primary">
+          Buat undangan <span aria-hidden="true">→</span>
+        </Button>
+      </header>
 
-      <main id="konten" className="dash__main">
-        <div className="row row--between dash__top">
-          <div className="stack gap-4">
-            <h1 className="display">Halo!</h1>
-            <span className="hint">
-              Ringkasan undanganmu hari ini. Masuk via WhatsApp +62 {session?.phone || '[NOMOR]'}.
-            </span>
-          </div>
-          <Button to="/katalog" variant="primary" size="sm">
-            + Undangan baru
-          </Button>
-        </div>
+      {error && <div className="dash__message dash__message--error" role="alert">{error}</div>}
 
-        {notice && (
-          <div className="toast" role="status">
-            {notice}
-          </div>
-        )}
+      <section className="dash__stats" aria-label="Ringkasan statistik">
+        {stats.map((stat, index) => (
+          <article key={stat.label} className="dash__stat">
+            <span className="dash__stat-number">{String(index + 1).padStart(2, '0')}</span>
+            <span className="dash__stat-label">{stat.label}</span>
+            <strong>{loading ? '—' : stat.value}</strong>
+          </article>
+        ))}
+      </section>
 
-        <div className="grid grid--4 dash__stats">
-          {stats.map((s) => (
-            <div key={s.label} className="stat">
-              <span>{s.label}</span>
-              <strong>{s.value}</strong>
+      <div className="dash__content">
+        <section id="daftar-tamu" className="dash__panel dash__guest-summary">
+          <div className="eyebrow">KEHADIRAN</div>
+          <h2 className="display">Daftar tamu</h2>
+          <p>
+            {loading
+              ? 'Memuat data tamu…'
+              : `${guests.length} tamu tercatat${invitation ? ` untuk ${invitation.judul || 'undanganmu'}` : ''}.`}
+          </p>
+          {invitation ? (
+            <Button to="/dashboard/tamu" variant="primary" size="sm">
+              Kelola daftar tamu <span aria-hidden="true">→</span>
+            </Button>
+          ) : (
+            <div className="dash__empty">
+              <h3>Belum ada undangan</h3>
+              <p>Buat undangan terlebih dahulu untuk mulai mengelola daftar tamu.</p>
+              <Button to="/katalog" variant="primary" size="sm">Pilih desain undangan</Button>
             </div>
-          ))}
-        </div>
+          )}
+        </section>
 
-        <div className="dash__cols">
-          <section className="panel dash__guests">
-            <div className="row row--between">
-              <h2 className="display">Daftar tamu</h2>
-              <div className="row gap-10">
-                <Button size="sm" onClick={() => flash('Impor tamu segera hadir.')}>
-                  Impor tamu
-                </Button>
-                <Button variant="primary" size="sm" onClick={() => setAdding((v) => !v)}>
-                  Tambah tamu
-                </Button>
-              </div>
+        <div className="dash__right">
+          <section id="undanganmu" className="dash__panel dash__invitation">
+            <div className="eyebrow">DESAIN PILIHAN</div>
+            <h2 className="display">Undanganmu</h2>
+            {template && <TemplateCover template={template} height={180} />}
+            <div className="dash__template-info">
+              <strong>{invitation?.judul || template?.name || 'Pilih desain undangan'}</strong>
+              <span>{invitation ? 'Undangan aktif' : 'Belum ada undangan aktif'}</span>
             </div>
-
-            {adding && (
-              <form className="dash__add" onSubmit={onAdd}>
-                <div className="field">
-                  <label htmlFor="tamu-nama">Nama tamu</label>
-                  <input
-                    id="tamu-nama"
-                    className="input"
-                    value={draft.name}
-                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                    autoFocus
-                  />
-                </div>
-                <div className="field dash__add-count">
-                  <label htmlFor="tamu-jumlah">Jumlah</label>
-                  <input
-                    id="tamu-jumlah"
-                    type="number"
-                    min="1"
-                    className="input"
-                    value={draft.count}
-                    onChange={(e) => setDraft({ ...draft, count: e.target.value })}
-                  />
-                </div>
-                <Button variant="primary" size="sm" type="submit">
-                  Simpan
-                </Button>
-              </form>
-            )}
-
-            <div className="table-wrap">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Jumlah</th>
-                    <th scope="col">Tautan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {guests.map((g) => (
-                    <tr key={g.id}>
-                      <td>{g.name}</td>
-                      <td>
-                        <span className={`status ${STATUS_CLASS[g.status]}`}>{g.status}</span>
-                      </td>
-                      <td>{g.count}</td>
-                      <td>
-                        <button type="button" className="link-button" onClick={() => copyLink(g)}>
-                          Salin
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="dash__template-actions">
+              <Button to={invitation ? `/undangan?template=${template?.id || 'aurelia'}` : '/katalog'} size="sm" block>
+                Pratinjau
+              </Button>
+              <Button to="/editor" variant="primary" size="sm" block>
+                Edit
+              </Button>
             </div>
           </section>
 
-          <div className="dash__right">
-            <section className="panel">
-              <h2 className="display">Undanganmu</h2>
-              <TemplateCover template={template} height={150} />
-              <div className="row gap-10">
-                <Button to="/undangan" size="sm" block>
-                  Lihat
-                </Button>
-                <Button variant="primary" size="sm" block onClick={() => flash('Penyuntingan segera hadir.')}>
-                  Sunting
-                </Button>
-              </div>
-            </section>
-
-            <section className="panel">
-              <h2 className="display">Ucapan terbaru</h2>
-              <ul className="inv-wishes inv-wishes--plain">
-                {wishes.slice(0, 4).map((w) => (
-                  <li key={w.id}>
-                    <strong>{w.name}</strong>
-                    <span>{w.message}</span>
+          <section id="ucapan-rsvp" className="dash__panel dash__wishes">
+            <div className="eyebrow">DARI PARA TAMU</div>
+            <h2 className="display">Ucapan terbaru</h2>
+            {wishes.length > 0 ? (
+              <ul>
+                {wishes.slice(0, 4).map((wish) => (
+                  <li key={wish.id}>
+                    <strong>{wish.nama || wish.name}</strong>
+                    <span>{wish.ucapan || wish.message}</span>
                   </li>
                 ))}
               </ul>
-              <Link to="/undangan" className="link-gold link-gold--start">
-                Lihat semua ucapan
+            ) : (
+              <p className="dash__wishes-empty">
+                {loading ? 'Memuat ucapan…' : 'Ucapan dari tamu akan muncul di sini.'}
+              </p>
+            )}
+            {invitation && (
+              <Link to={`/undangan?template=${template?.id || 'aurelia'}`} className="dash__text-link">
+                Lihat undangan <span aria-hidden="true">→</span>
               </Link>
-            </section>
-          </div>
+            )}
+          </section>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardShell>
   );
 }

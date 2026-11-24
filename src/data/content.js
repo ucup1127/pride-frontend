@@ -18,12 +18,12 @@ export const FEATURES = [
   { no: '06', title: 'Countdown acara', text: 'Hitung mundur otomatis menuju hari H.' },
   { no: '07', title: 'Banyak jenis acara', text: 'Pernikahan, ulang tahun, wisuda, ujian, bukber, dan lainnya.' },
   { no: '08', title: 'Ucapan custom', text: 'Tulis judul, pesan, dan tampilan sendiri untuk momen apa pun.' },
-  { no: '09', title: 'Chat Instagram', text: 'Beli paket lalu langsung masuk dengan Instagram, melalui @bypride.studio.' },
+  { no: '09', title: 'Bantuan via Instagram', text: 'Hubungi tim Pride melalui @bypride.studio jika kamu memerlukan bantuan.' },
 ];
 
 export const STEPS = [
   { no: '1', title: 'Pilih template', text: 'Jelajahi katalog untuk pernikahan, ulang tahun, wisuda, dan acara lain.' },
-  { no: '2', title: 'Masuk lewat Instagram', text: 'Pilih paket, lalu masuk dengan Instagram. Tanpa buat akun.' },
+  { no: '2', title: 'Masuk ke akun Pride', text: 'Pilih paket, lalu masuk menggunakan email dan kata sandi akunmu.' },
   { no: '3', title: 'Isi data acara', text: 'Nama, tanggal, lokasi, foto, atau ucapan custom milikmu.' },
   { no: '4', title: 'Bagikan & pantau', text: 'Kirim tautan lewat Instagram dan lihat konfirmasi tamu di dashboard.' },
 ];
@@ -35,7 +35,7 @@ export const PLANS = [
 ];
 
 export const FAQS = [
-  { q: 'Bagaimana cara memesan?', a: 'Pilih template dan paket, lalu masuk dengan Instagram. Kamu tidak perlu membuat akun baru.' },
+  { q: 'Bagaimana cara memesan?', a: 'Pilih paket, lalu masuk ke akun Pride menggunakan email dan kata sandi. Jika belum memiliki akun, hubungi tim Pride melalui halaman Bantuan.' },
   { q: 'Apakah undangan bisa diubah setelah dibagikan?', a: 'Bisa. Perubahan data langsung tampil di tautan yang sama.' },
   { q: 'Berapa lama undangan aktif?', a: 'Sesuai paket yang dipilih. Detail durasi ada di tabel paket.' },
   { q: 'Apakah tamu perlu memasang aplikasi?', a: 'Tidak. Undangan dibuka lewat browser di HP atau komputer.' },
@@ -45,7 +45,7 @@ export const FAQS = [
 export const TUTORIAL_STEPS = [
   { no: '1', title: 'Pilih jenis acara', text: 'Buka katalog lalu filter sesuai acara: pernikahan, ulang tahun, wisuda, ujian, bukber, atau ucapan custom.', to: '/katalog', cta: 'Buka katalog' },
   { no: '2', title: 'Lihat pratinjau', text: 'Klik Pratinjau untuk melihat contoh undangan di tampilan HP sebelum memutuskan.', to: '/undangan', cta: 'Lihat contoh undangan' },
-  { no: '3', title: 'Pilih paket dan lanjutkan lewat Instagram', text: 'Klik Beli, lalu masukkan Instagram. Kode verifikasi dikirim ke Instagram-mu, tanpa perlu membuat akun.', to: '/masuk', cta: 'Chat Instagram' },
+  { no: '3', title: 'Pilih paket dan masuk ke Pride', text: 'Klik Beli, lalu masuk menggunakan email dan kata sandi akun Pride. Jika belum memiliki akun, hubungi tim kami melalui halaman Bantuan.', to: '/masuk', cta: 'Masuk ke Pride' },
   { no: '4', title: 'Isi data acara', text: 'Lengkapi nama, tanggal, lokasi, foto, dan musik. Untuk ucapan custom, tulis judul dan pesanmu sendiri.', to: '/dashboard', cta: 'Buka dashboard' },
   { no: '5', title: 'Tambahkan daftar tamu', text: 'Masukkan nama tamu agar setiap orang mendapat tautan dengan namanya sendiri.', to: '/dashboard', cta: 'Kelola tamu' },
   { no: '6', title: 'Bagikan dan pantau', text: 'Salin tautan, kirim lewat Instagram, lalu pantau konfirmasi hadir dan ucapan di dashboard.', to: '/dashboard', cta: 'Lihat RSVP' },

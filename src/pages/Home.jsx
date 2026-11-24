@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import SectionHeading from '../components/SectionHeading';
 import TemplateCard from '../components/TemplateCard';
 import PlanCard from '../components/PlanCard';
-import { FAQS, FEATURES, MOMENTS, PLANS, STEPS } from '../data/content';
+import { FEATURES, PLANS, STEPS } from '../data/content';
 import { FEATURED_IDS, TEMPLATES } from '../data/templates';
 
 const MOMENT_DATA = {
@@ -57,14 +57,9 @@ function PhoneMockup() {
   const weddingPhoto = 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&h=1200&fit=crop&q=80';
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20,
-    }}>
+    <div className="hero__visual">
       {/* Frame HP */}
-      <div style={{
+      <div className="phone" style={{
         position: 'relative',
         width: 260,
         height: 520,
@@ -75,7 +70,7 @@ function PhoneMockup() {
         flexShrink: 0,
       }}>
         {/* Layar */}
-        <div style={{
+        <div className="phone__screen" style={{
           position: 'absolute',
           inset: 9,
           borderRadius: 32,
@@ -96,13 +91,13 @@ function PhoneMockup() {
             }}
           />
           {/* Overlay gradient */}
-          <div style={{
+          <div className="phone__shade" style={{
             position: 'absolute',
             inset: 0,
             background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.80) 100%)',
           }} />
           {/* Konten */}
-          <div style={{
+          <div className="phone__content" style={{
             position: 'absolute',
             inset: 0,
             padding: '48px 20px 26px',
@@ -113,7 +108,7 @@ function PhoneMockup() {
             textAlign: 'center',
           }}>
             {/* Header */}
-            <div style={{
+            <div className="phone__event" style={{
               fontSize: '0.55rem',
               letterSpacing: '0.3em',
               color: 'rgba(255,255,255,0.95)',
@@ -123,7 +118,7 @@ function PhoneMockup() {
             </div>
 
             {/* Footer: nama + tanggal + tombol */}
-            <div>
+            <div className="phone__details">
               <div style={{
                 fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
                 fontSize: '1.9rem',
@@ -133,7 +128,7 @@ function PhoneMockup() {
               }}>
                 Nadia
               </div>
-              <div style={{
+              <div className="phone__date" style={{
                 fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
                 fontSize: '1.1rem',
                 fontStyle: 'italic',
@@ -142,7 +137,7 @@ function PhoneMockup() {
               }}>
                 &amp;
               </div>
-              <div style={{
+              <div className="phone__button" style={{
                 fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
                 fontSize: '1.9rem',
                 fontWeight: 500,
@@ -167,7 +162,7 @@ function PhoneMockup() {
                 fontSize: '0.6rem',
                 fontWeight: 600,
                 letterSpacing: '0.16em',
-                borderRadius: 100,
+                borderRadius: 12,
                 textTransform: 'uppercase',
               }}>
                 Buka Undangan
@@ -221,30 +216,19 @@ export default function Home() {
       </section>
 
       <section id="momen" className="section">
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
+        <div className="container">
           <div style={{ marginBottom: 48 }}>
             <SectionHeading eyebrow="Untuk setiap momen" title="Bukan hanya untuk pernikahan" />
           </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 16,
-          }}>
+          <div className="moment-grid">
             {MOMENT_LIST.map((m) => {
               const data = MOMENT_DATA[m.title] || {};
               return (
                 <Link
                   key={m.title}
                   to={`/katalog?kategori=${encodeURIComponent(m.category)}`}
-                  style={{
-                    backgroundColor: data.color || '#8B6F47',
-                    position: 'relative',
-                    display: 'block',
-                    minHeight: 260,
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    textDecoration: 'none',
-                  }}
+                  className="moment-card"
+                  style={{ backgroundColor: data.color || '#8B6F47' }}
                 >
                   {data.img && (
                     <img
@@ -252,48 +236,13 @@ export default function Home() {
                       alt=""
                       loading="lazy"
                       onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        zIndex: 0,
-                      }}
+                      className="moment-card__image"
                     />
                   )}
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.78) 100%)',
-                    zIndex: 1,
-                  }} />
-                  <div style={{
-                    position: 'relative',
-                    zIndex: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                    minHeight: 260,
-                    padding: '24px 22px',
-                    color: '#FFF',
-                  }}>
-                    <h3 style={{
-                      fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-                      fontSize: '1.5rem',
-                      fontWeight: 500,
-                      margin: '0 0 8px',
-                      color: '#FFF',
-                      lineHeight: 1.1,
-                    }}>
-                      {m.title}
-                    </h3>
-                    <p style={{ fontSize: '0.85rem', lineHeight: 1.45, margin: '0 0 12px', color: 'rgba(255,255,255,0.92)' }}>
-                      {m.text}
-                    </p>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#FFF' }}>
-                      Lihat template →
-                    </span>
+                  <div className="moment-card__content">
+                    <h3 className="moment-card__title">{m.title}</h3>
+                    <p className="moment-card__desc">{m.text}</p>
+                    <span className="moment-card__link">Lihat template <span aria-hidden="true">→</span></span>
                   </div>
                 </Link>
               );
@@ -305,7 +254,7 @@ export default function Home() {
       <section id="fitur" className="section section--tint">
         <div className="container stack gap-56">
           <SectionHeading eyebrow="Fitur" title="Semua yang dibutuhkan untuk hari istimewa" />
-          <div className="grid grid--3">
+          <div className="feature-rail">
             {FEATURES.map((f) => (
               <article key={f.no} className="feature-card">
                 <div className="feature-card__no">{f.no}</div>
@@ -359,20 +308,6 @@ export default function Home() {
           <div className="grid grid--3 grid--stretch">
             {PLANS.map((p) => (
               <PlanCard key={p.name} plan={p} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="faq" className="section section--tint">
-        <div className="container faq">
-          <SectionHeading eyebrow="FAQ" title="Pertanyaan yang sering muncul" />
-          <div className="faq__list">
-            {FAQS.map((f) => (
-              <div key={f.q} className="faq__item">
-                <h3>{f.q}</h3>
-                <p>{f.a}</p>
-              </div>
             ))}
           </div>
         </div>

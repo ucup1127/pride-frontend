@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { findTemplate } from '../data/templates';
 import { listWishes, submitRsvp } from '../services/api';
 
@@ -22,8 +22,18 @@ function useCountdown(target) {
   ];
 }
 
-const Placeholder = ({ children, className = '' }) => (
-  <div className={`inv-photo ${className}`}>{children}</div>
+const Placeholder = ({ children, className = '', src }) => (
+  <div className={`inv-photo ${className}`}>
+    {src && (
+      <img
+        className="inv-photo__image"
+        src={src}
+        alt=""
+        onError={(event) => { event.currentTarget.style.display = 'none'; }}
+      />
+    )}
+    {children}
+  </div>
 );
 
 export default function Undangan() {
@@ -33,6 +43,7 @@ export default function Undangan() {
   const [first, second] = template.names.includes('&')
     ? template.names.split('&').map((s) => s.trim())
     : [template.names, null];
+  const design = template.design || 'editorial';
 
   const countdown = useCountdown(EVENT_DATE);
   const [wishes, setWishes] = useState([]);
@@ -73,14 +84,15 @@ export default function Undangan() {
 
   return (
     <div className="inv-stage">
-      <div className="inv">
+      <Link to="/" className="inv-back">← Kembali ke Pride</Link>
+      <div className={`inv inv--${design}`}>
         {/* Sampul */}
         <section
-          className="inv-cover"
-          style={{ background: `linear-gradient(180deg, ${template.bg}, ${template.bg}cc)`, color: template.fg }}
+          className={`inv-cover inv-cover--${design}`}
+          style={{ '--invitation-bg': template.bg, '--invitation-fg': template.fg }}
         >
           <div className="inv-eyebrow" style={{ color: template.fg }}>{template.event}</div>
-          <Placeholder>[FOTO]</Placeholder>
+          <Placeholder className="inv-photo--cover" src={template.img} />
           <div className="inv-names">
             {first}
             {second && (

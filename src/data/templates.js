@@ -119,22 +119,35 @@ const photoFor=(cat,n)=>{
 };
 
 const seeds=[
-  {id:'aurelia',name:'Aurelia',style:'Klasik',category:'Pernikahan',tag:'Populer',event:'THE WEDDING OF',names:'Nadia & Raka',date:'12 · 12 · 2026',bg:'#EFE6D3',fg:'#4A3A1E'},
-  {id:'verdant',name:'Verdant',style:'Botanikal',category:'Pernikahan',tag:'Baru',event:'THE WEDDING OF',names:'Salsa & Bima',date:'20 · 02 · 2027',bg:'#DDE3D3',fg:'#2F3B2A'},
-  {id:'noir',name:'Noir',style:'Modern',category:'Pernikahan',tag:'Populer',event:'THE WEDDING OF',names:'Tari & Dimas',date:'03 · 04 · 2027',bg:'#2A2926',fg:'#E8DCC0'},
-  {id:'blush',name:'Blush',style:'Romantis',category:'Pernikahan',tag:'Baru',event:'THE WEDDING OF',names:'Maya & Ardi',date:'15 · 05 · 2027',bg:'#F2DDD6',fg:'#5A3029'},
-  {id:'sage',name:'Sage',style:'Minimalis',category:'Pernikahan',tag:'Pilihan',event:'THE WEDDING OF',names:'Lia & Fajar',date:'10 · 07 · 2027',bg:'#E6EADF',fg:'#33402D'},
-  {id:'gala',name:'Gala',style:'Elegan',category:'Ulang tahun',tag:'Populer',event:'HAPPY BIRTHDAY',names:'Sinta 30',date:'08 · 03 · 2027',bg:'#F2DDD6',fg:'#5A3029'},
-  {id:'toga',name:'Toga',style:'Klasik',category:'Wisuda',tag:'Pilihan',event:'GRADUATION',names:'Bima, S.T.',date:'14 · 08 · 2027',bg:'#DCE6EA',fg:'#243B47'},
-  {id:'sidang',name:'Sidang',style:'Formal',category:'Sempro/Semhas',tag:'Akademik',event:'SEMPRO / SEMHAS',names:'Rani Putri',date:'[TANGGAL]',bg:'#E9E6E0',fg:'#2A2926'},
-  {id:'iftar',name:'Iftar',style:'Hangat',category:'Bukber & Khitanan',tag:'Hangat',event:'BUKA PUASA BERSAMA',names:'Bukber Alumni',date:'[TANGGAL]',bg:'#EADFC8',fg:'#4A3A1E'},
-  {id:'tirta',name:'Tirta',style:'Ceria',category:'Bukber & Khitanan',tag:'Ceria',event:'UNDANGAN KHITANAN',names:'Aksa',date:'24 · 01 · 2027',bg:'#DCE6EA',fg:'#243B47'},
-  {id:'forum',name:'Forum',style:'Formal',category:'Acara kantor',tag:'Profesional',event:'ANNUAL GATHERING',names:'[NAMA ACARA]',date:'[TANGGAL]',bg:'#E9E6E0',fg:'#2A2926'},
-  {id:'aqiqah-1',name:'Cahaya',style:'Hangat',category:'Aqiqah & Tasyakuran',tag:'Baru',event:'AQIQAH & TASYAKURAN',names:'Aksa Zahran',date:'[TANGGAL]',bg:'#FBF1DC',fg:'#66502D'},
-  {id:'anniv-1',name:'Memoria',style:'Klasik',category:'Anniversary & Reuni',tag:'Pilihan',event:'ANNIVERSARY',names:'5 Tahun Bersama',date:'[TANGGAL]',bg:'#E8E0EE',fg:'#49364F'},
+  {id:'aurelia',name:'Aurelia',style:'Klasik',design:'editorial',category:'Pernikahan',tag:'Populer',event:'THE WEDDING OF',names:'Nadia & Raka',date:'12 · 12 · 2026',bg:'#EFE6D3',fg:'#4A3A1E'},
+  {id:'verdant',name:'Verdant',style:'Botanikal',design:'botanical',category:'Pernikahan',tag:'Baru',event:'THE WEDDING OF',names:'Salsa & Bima',date:'20 · 02 · 2027',bg:'#DDE3D3',fg:'#2F3B2A'},
+  {id:'noir',name:'Noir',style:'Modern',design:'noir',category:'Pernikahan',tag:'Populer',event:'THE WEDDING OF',names:'Tari & Dimas',date:'03 · 04 · 2027',bg:'#2A2926',fg:'#E8DCC0'},
+  {id:'blush',name:'Blush',style:'Romantis',design:'romantic',category:'Pernikahan',tag:'Baru',event:'THE WEDDING OF',names:'Maya & Ardi',date:'15 · 05 · 2027',bg:'#F2DDD6',fg:'#5A3029'},
+  {id:'sage',name:'Sage',style:'Minimalis',design:'minimal',category:'Pernikahan',tag:'Pilihan',event:'THE WEDDING OF',names:'Lia & Fajar',date:'10 · 07 · 2027',bg:'#E6EADF',fg:'#33402D'},
+  {id:'gala',name:'Gala',style:'Elegan',design:'playful',category:'Ulang tahun',tag:'Populer',event:'HAPPY BIRTHDAY',names:'Sinta 30',date:'08 · 03 · 2027',bg:'#F2DDD6',fg:'#5A3029'},
+  {id:'toga',name:'Toga',style:'Klasik',design:'classic',category:'Wisuda',tag:'Pilihan',event:'GRADUATION',names:'Bima, S.T.',date:'14 · 08 · 2027',bg:'#DCE6EA',fg:'#243B47'},
+  {id:'sidang',name:'Sidang',style:'Formal',design:'minimal',category:'Sempro/Semhas',tag:'Akademik',event:'SEMPRO / SEMHAS',names:'Rani Putri',date:'[TANGGAL]',bg:'#E9E6E0',fg:'#2A2926'},
+  {id:'iftar',name:'Iftar',style:'Hangat',design:'classic',category:'Bukber & Khitanan',tag:'Hangat',event:'BUKA PUASA BERSAMA',names:'Bukber Alumni',date:'[TANGGAL]',bg:'#EADFC8',fg:'#4A3A1E'},
+  {id:'tirta',name:'Tirta',style:'Ceria',design:'playful',category:'Bukber & Khitanan',tag:'Ceria',event:'UNDANGAN KHITANAN',names:'Aksa',date:'24 · 01 · 2027',bg:'#DCE6EA',fg:'#243B47'},
+  {id:'forum',name:'Forum',style:'Formal',design:'modern',category:'Acara kantor',tag:'Profesional',event:'ANNUAL GATHERING',names:'[NAMA ACARA]',date:'[TANGGAL]',bg:'#E9E6E0',fg:'#2A2926'},
+  {id:'aqiqah-1',name:'Cahaya',style:'Hangat',design:'botanical',category:'Aqiqah & Tasyakuran',tag:'Baru',event:'AQIQAH & TASYAKURAN',names:'Aksa Zahran',date:'[TANGGAL]',bg:'#FBF1DC',fg:'#66502D'},
+  {id:'anniv-1',name:'Memoria',style:'Klasik',design:'film',category:'Anniversary & Reuni',tag:'Pilihan',event:'ANNIVERSARY',names:'5 Tahun Bersama',date:'[TANGGAL]',bg:'#E8E0EE',fg:'#49364F'},
 ];
 
-const styles=[['Luna','#F2DDD6','#5A3029'],['Arunika','#EADFC8','#4A3A1E'],['Senja','#E6EADF','#33402D'],['Velvet','#2A2926','#E8DCC0'],['Bloom','#F4E8DF','#67443A'],['Aster','#DCE6EA','#243B47'],['Nara','#FBF1DC','#66502D'],['Elara','#E8E0EE','#49364F'],['Kirana','#E1E9DF','#304532'],['Mori','#E9E6E0','#2A2926'],['Sora','#DDE8EC','#27424A'],['Rumi','#F1E2D1','#634A31']];
+const styles=[
+  ['Luna','#F2DDD6','#5A3029','romantic'],
+  ['Arunika','#EADFC8','#4A3A1E','classic'],
+  ['Senja','#E6EADF','#33402D','botanical'],
+  ['Velvet','#2A2926','#E8DCC0','noir'],
+  ['Bloom','#F4E8DF','#67443A','arched'],
+  ['Aster','#DCE6EA','#243B47','minimal'],
+  ['Nara','#FBF1DC','#66502D','editorial'],
+  ['Elara','#E8E0EE','#49364F','film'],
+  ['Kirana','#E1E9DF','#304532','botanical'],
+  ['Mori','#E9E6E0','#2A2926','modern'],
+  ['Sora','#DDE8EC','#27424A','playful'],
+  ['Rumi','#F1E2D1','#634A31','classic'],
+];
 
 const meta={
   'Pernikahan':['THE WEDDING OF','Nadia & Raka'],
@@ -151,17 +164,18 @@ export const TEMPLATES=Object.keys(CATEGORY_COUNTS).flatMap(cat=>{
   const base=seeds.filter(t=>t.category===cat).map((t,i)=>({...t,img:photoFor(cat,i+1)}));
   const items=[...base];
   for(let i=items.length;i<CATEGORY_COUNTS[cat];i++){
-    const s=styles[(i+Object.keys(CATEGORY_COUNTS).indexOf(cat)*2)%styles.length];
+    const [name,bg,fg,design]=styles[(i+Object.keys(CATEGORY_COUNTS).indexOf(cat)*2)%styles.length];
     const [event,names]=meta[cat]||['SPECIAL EVENT','Tamu Undangan'];
     items.push({
       id:`${cat.toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${i+1}`,
-      name:s[0],
+      name,
       style:['Minimalis','Modern','Elegan','Botanikal','Klasik'][i%5],
+      design,
       category:cat,
       tag:i===0?'Pilihan':'Bisa diedit',
       event,names,
       date:'[TANGGAL]',
-      bg:s[1],fg:s[2],
+      bg,fg,
       img:photoFor(cat,i+1)
     });
   }

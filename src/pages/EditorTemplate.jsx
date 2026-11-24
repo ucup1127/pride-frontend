@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import PackageGate from '../components/PackageGate';
 import { findTemplate } from '../data/templates';
 
 // Contoh musik latar untuk preview. Untuk produksi, ganti URL dengan file audio
@@ -31,7 +32,7 @@ export default function EditorTemplate() {
     setSaved(false);
   }, [form, color, musicId, musicEnabled]);
 
-  if (!plan) return <Layout><section className="container page-head"><div className="eyebrow">MULAI DARI PAKET</div><h1 className="display page-head__title">Pilih paket terlebih dahulu</h1><p className="lead">Setelah paket dipilih, kamu bisa membuka semua koleksi template dan mengatur detail undangan.</p><Link className="btn btn--primary" to="/paket">Lihat paket →</Link></section></Layout>;
+  if (!plan) return <Layout><PackageGate eyebrow="MULAI DARI PAKET" title="Pilih paket untuk membuka editor." description="Tentukan paketmu dan selesaikan pembayaran sebelum mengatur detail undangan." /></Layout>;
 
   return <Layout>
     <section className="container page-head editor-page-head">

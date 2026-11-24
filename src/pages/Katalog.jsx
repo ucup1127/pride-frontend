@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import PackageGate from '../components/PackageGate';
 import TemplateCard from '../components/TemplateCard';
 import { CATEGORIES, TEMPLATES, CATEGORY_COUNTS } from '../data/templates';
 
@@ -10,7 +11,7 @@ export default function Katalog() {
   const category = CATEGORIES.includes(rawCategory) ? rawCategory : 'Semua';
   const query = params.get('cari') || '';
   const paidPlan = localStorage.getItem('pride-paid-plan');
-  if (!paidPlan) return <Layout><section className="container page-head"><div className="eyebrow">LANGKAH BERIKUTNYA</div><h1 className="display page-head__title">Pilih paket sebelum memilih template.</h1><p className="lead page-head__text">Setelah paket dan pembayaran terkonfirmasi, kamu bisa membuka katalog dan mengedit template sendiri.</p><a className="btn btn--primary" href="/paket">Pilih paket →</a></section></Layout>;
+  if (!paidPlan) return <Layout><PackageGate /></Layout>;
 
   const update = (key, value) => {
     const next = new URLSearchParams(params);

@@ -9,6 +9,15 @@ Frontend React + Vite untuk undangan digital Pride Studio.
 3. Jalankan `npm install`.
 4. Jalankan `npm run dev`.
 
+## Login dengan Google
+
+1. Buat OAuth Client ID tipe **Web application** di Google Cloud Console.
+2. Tambahkan origin frontend (misalnya `http://localhost:5173`) ke **Authorized JavaScript origins**.
+3. Isi `VITE_GOOGLE_CLIENT_ID` di environment frontend dan `GOOGLE_CLIENT_ID` di backend dengan Client ID yang sama.
+4. Set `VITE_DEMO_MODE=false` agar halaman masuk menggunakan endpoint backend.
+
+Client ID bersifat publik; backend memverifikasi kredensial Google sebelum menerbitkan sesi Pride. Client secret tidak diperlukan untuk alur ini.
+
 ## Yang tersedia pada versi ini
 
 - Halaman Home, Acara, Fitur, Paket, Checkout, Katalog, Editor, Preview Undangan, Login, dan Dashboard.
