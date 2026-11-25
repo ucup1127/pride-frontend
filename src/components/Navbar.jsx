@@ -8,8 +8,6 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const { session } = useAuth();
-  const hasPaidPlan = Boolean(localStorage.getItem('pride-paid-plan'));
-
   return (
     <header className="navbar">
       <div className="container navbar__inner">
@@ -35,10 +33,16 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          {session?.user?.role === 'admin' && (
+            <>
+              <Link to="/admin" onClick={() => setOpen(false)}>Dashboard pemilik</Link>
+              <Link to="/admin/payments" onClick={() => setOpen(false)}>Verifikasi pembayaran</Link>
+            </>
+          )}
           <div className="navbar__actions">
             {session ? (
-              <Button to={hasPaidPlan ? '/dashboard' : '/paket'} variant="primary" size="sm">
-                {hasPaidPlan ? 'Dashboard' : 'Pilih paket'}
+              <Button to="/dashboard" variant="primary" size="sm">
+                Dashboard
               </Button>
             ) : (
               <>

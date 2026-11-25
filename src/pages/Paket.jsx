@@ -1,3 +1,82 @@
-import {useState} from 'react';import {Link} from 'react-router-dom';import Layout from '../components/Layout';
-const PLANS=[{id:'basic',name:'Basic',price:'Rp49.000',desc:'Undangan digital simpel untuk acara spesial.',features:['1 link undangan','Pilih 1 dari 62 template','Edit nama, tanggal, lokasi & teks','Musik latar','Masa aktif 3 bulan']},{id:'plus',name:'Plus',price:'Rp89.000',desc:'Pilihan fleksibel dengan fitur interaktif.',popular:true,features:['Semua fitur Basic','Galeri foto hingga 10 foto','RSVP & ucapan tamu','Countdown acara','Masa aktif 6 bulan']},{id:'premium',name:'Premium',price:'Rp149.000',desc:'Pengalaman undangan lebih lengkap dan personal.',features:['Semua fitur Plus','Galeri hingga 25 foto','Amplop digital / hadiah','Peta lokasi interaktif','Masa aktif 12 bulan']}];
-export default function Paket(){const [chosen,setChosen]=useState(localStorage.getItem('pride-plan')||'plus');return <Layout><section className="container page-head"><div className="eyebrow">PAKET PRIDE</div><h1 className="display page-head__title">Pilih paket, lalu buat undanganmu.</h1><p className="lead page-head__text">Tentukan fitur yang kamu butuhkan. Kamu akan menyelesaikan pembayaran sebelum memilih dan mengedit template.</p></section><section className="container plan-grid">{PLANS.map(p=><article key={p.id} className={`plan-card ${chosen===p.id?'plan-card--selected':''} ${p.popular?'plan-card--popular':''}`}>{p.popular&&<span className="plan-ribbon">Paling populer</span>}<div className="eyebrow">PAKET {p.name.toUpperCase()}</div><h2 className="display">{p.name}</h2><p>{p.desc}</p><div className="plan-price">{p.price}<small> / undangan</small></div><ul>{p.features.map(f=><li key={f}>✓ &nbsp;{f}</li>)}</ul><button className={`btn ${chosen===p.id?'btn--primary':''}`} onClick={()=>{setChosen(p.id);localStorage.setItem('pride-plan',p.id)}}>{chosen===p.id?'Paket dipilih':'Pilih paket'}</button></article>)}</section><section className="container checkout-strip"><div><h2 className="display">Lanjut ke pembayaran</h2><p>Paket terpilih: <strong>{PLANS.find(p=>p.id===chosen)?.name}</strong>. Setelah pembayaran terkonfirmasi, katalog template akan terbuka.</p></div><Link className="btn btn--primary" to={`/checkout?paket=${chosen}`}>Lanjut pembayaran →</Link></section></Layout>}
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import Layout from '../components/Layout';
+import { useAuth } from '../auth';
+import { formatPackagePrice, getPackage, PACKAGES } from '../data/packages';
+
+export default function Paket() {
+  const [params, setParams] = useSearchParams();
+  const { session } = useAuth();
+  const initialPackage = getPackage(params.get('paket') || localStorage.getItem('pride-plan')) || PACKAGES[0];
+  const [chosen, setChosen] = useState(initialPackage.id);
+  const selectedPackage = getPackage(chosen) || PACKAGES[0];
+  const checkoutPath = session
+    ? `/checkout?paket=${selectedPackage.id}`
+    : `/masuk?paket=${selectedPackage.id}`;
+
+  const selectPackage = (id) => {
+    setChosen(id);
+    localStorage.setItem('pride-plan', id);
+    const next = new URLSearchParams(params);
+    next.set('paket', id);
+    setParams(next, { replace: true });
+  };
+
+  return (
+    <Layout>
+      <section className="container page-head">
+        <div className="eyebrow">PAKET PRIDE</div>
+        <h1 className="display page-head__title">Pilih paket untuk undanganmu.</h1>
+        <p className="lead page-head__text">
+          Klik kartu paket yang kamu inginkan. Pembayaran dilakukan sebelum membuat undangan.
+        </p>
+      </section>
+
+      <fieldset className="container plan-grid">
+        <legend className="sr-only">Pilih paket Pride</legend>
+        {PACKAGES.map((plan) => (
+          <label
+            className={`plan-card${chosen === plan.id ? ' plan-card--selected' : ''}${plan.featured ? ' plan-card--popular' : ''}`}
+            key={plan.id}
+          >
+            <input
+              className="plan-card__radio"
+              type="radio"
+              name="package"
+              value={plan.id}
+              checked={chosen === plan.id}
+              onChange={() => selectPackage(plan.id)}
+            />
+            {plan.featured && <span className="plan-ribbon">Pilihan populer</span>}
+            <span className="eyebrow">PAKET {plan.name.toUpperCase()}</span>
+            <span className="display plan-card__title">{plan.name}</span>
+            <span className="plan-card__description">{plan.description}</span>
+            <span className="plan-price">
+              {formatPackagePrice(plan.price)}
+              <small> / paket</small>
+            </span>
+            <ul>
+              {plan.features.map((feature) => <li key={feature}>{feature}</li>)}
+            </ul>
+            <span className="plan-card__selection" aria-hidden="true">
+              {chosen === plan.id ? 'Paket dipilih' : 'Klik untuk memilih'}
+            </span>
+          </label>
+        ))}
+      </fieldset>
+
+      <section className="container checkout-strip">
+        <div>
+          <h2 className="display">Lanjut ke pembayaran</h2>
+          <p>
+            Paket terpilih: <strong>{selectedPackage.name}</strong> · {formatPackagePrice(selectedPackage.price)}.
+            {' '}Admin akan memverifikasi transfer sebelum paket diaktifkan.
+          </p>
+        </div>
+        <Link className="btn btn--primary" to={checkoutPath}>
+          Lanjut pembayaran <span aria-hidden="true">→</span>
+        </Link>
+      </section>
+    </Layout>
+  );
+}

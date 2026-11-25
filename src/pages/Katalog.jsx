@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import PackageGate from '../components/PackageGate';
 import TemplateCard from '../components/TemplateCard';
 import { CATEGORIES, TEMPLATES, CATEGORY_COUNTS } from '../data/templates';
 
@@ -10,9 +9,6 @@ export default function Katalog() {
   const rawCategory = params.get('kategori');
   const category = CATEGORIES.includes(rawCategory) ? rawCategory : 'Semua';
   const query = params.get('cari') || '';
-  const paidPlan = localStorage.getItem('pride-paid-plan');
-  if (!paidPlan) return <Layout><PackageGate /></Layout>;
-
   const update = (key, value) => {
     const next = new URLSearchParams(params);
     if (value && !(key === 'kategori' && value === 'Semua')) next.set(key, value);
@@ -32,7 +28,7 @@ export default function Katalog() {
   return (
     <Layout>
       <section className="container page-head">
-        <div className="eyebrow">TEMPLATE · PAKET {paidPlan.toUpperCase()}</div>
+        <div className="eyebrow">KATALOG TEMPLATE</div>
         <h1 className="display page-head__title">Temukan template yang paling cocok untukmu</h1>
         <p className="lead page-head__text">
           Pilih template untuk melanjutkan ke editor. Jumlah koleksi per kategori tersedia sesuai daftar Pride Studio.

@@ -7,21 +7,13 @@ import { findTemplate } from '../data/templates';
 import { useAuth } from '../auth';
 import { listGuests, listUndangan, listWishes } from '../services/api';
 
-const ACCOUNT_PLAN = {
-  basic: 'Basic',
-  plus: 'Standard',
-  standard: 'Standard',
-  premium: 'Premium',
-};
-
-export default function Dashboard() {
+export default function Dashboard({ packageAccess }) {
   const { session } = useAuth();
   const [invitation, setInvitation] = useState(null);
   const [guests, setGuests] = useState([]);
   const [wishes, setWishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const paidPlan = localStorage.getItem('pride-paid-plan');
   const accountName =
     session?.user?.name ||
     session?.user?.email?.split('@')[0] ||
@@ -39,10 +31,11 @@ export default function Dashboard() {
         setInvitation(currentInvitation);
 
         if (currentInvitation) {
-          const [guestList, wishList] = await Promise.all([
-            listGuests(currentInvitation.id),
-            listWishes(currentInvitation.id),
-          ]);
+          const guestListPromise = listGuests(currentInvitation.id);
+          const wishListPromise = currentInvitation.status === 'published'
+            ? listWishes(currentInvitation.id)
+            : Promise.resolve([]);
+          const [guestList, wishList] = await Promise.all([guestListPromise, wishListPromise]);
           if (!active) return;
           setGuests(guestList);
           setWishes(wishList);
@@ -71,10 +64,10 @@ export default function Dashboard() {
   );
 
   const template = findTemplate(invitation?.templateId || 'aurelia');
-  const planName = ACCOUNT_PLAN[paidPlan] || paidPlan || 'Paket aktif';
+  const planName = packageAccess?.package?.name || 'Paket aktif';
 
   return (
-    <DashboardShell activeMenu="ringkasan">
+    <DashboardShell activeMenu="ringkasan" planName={planName}>
       <header id="ringkasan" className="dash__top">
         <div>
           <div className="eyebrow">RUANG KERJA PRIDE · {planName}</div>

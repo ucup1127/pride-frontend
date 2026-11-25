@@ -4,7 +4,8 @@ import Button from '../components/Button';
 import Layout from '../components/Layout';
 import { useAuth } from '../auth';
 import { DEMO_MODE, GOOGLE_CLIENT_ID } from '../config';
-import { googleLogin, login } from '../services/api';
+import { getPackage } from '../data/packages';
+import { googleLogin, login, register } from '../services/api';
 
 let googleScriptPromise;
 
@@ -31,8 +32,7 @@ function getDestination(from, plan) {
   if (from) return from;
   if (!plan) return '/dashboard';
 
-  const planId = plan.toLowerCase() === 'standard' ? 'plus' : plan.toLowerCase();
-  return `/checkout?paket=${encodeURIComponent(planId)}`;
+  return `/checkout?paket=${encodeURIComponent(plan.toLowerCase())}`;
 }
 
 export default function Login() {
@@ -41,9 +41,12 @@ export default function Login() {
   const navigate = useNavigate();
   const { session, signIn } = useAuth();
   const plan = params.get('paket');
+  const planName = getPackage(plan)?.name || plan;
+  const isRegistering = params.get('daftar') === '1';
   const destination = getDestination(location.state?.from, plan);
 
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -111,7 +114,9 @@ export default function Login() {
     setBusy(true);
 
     try {
-      const result = await login({ email: email.trim(), password });
+      const result = isRegistering
+        ? await register({ name: name.trim(), email: email.trim(), password })
+        : await login({ email: email.trim(), password });
       signIn(result);
       navigate(destination, { replace: true });
     } catch (err) {
@@ -126,24 +131,39 @@ export default function Login() {
       <section className="container auth-login">
         <div className="auth-login__intro">
           <div className="eyebrow">AKUN PRIDE</div>
-          <h1 className="display">Senang bertemu lagi.</h1>
-          <p>Masuk untuk mengelola undangan dan melanjutkan proses pesananmu.</p>
+          <h1 className="display">{isRegistering ? 'Mulai dengan Pride.' : 'Senang bertemu lagi.'}</h1>
+          <p>{isRegistering ? 'Buat akun untuk memesan paket dan mengelola undanganmu.' : 'Masuk untuk mengelola undangan dan melanjutkan proses pesananmu.'}</p>
         </div>
 
         <div className="auth-login__card">
           <div className="auth-login__heading">
-            <h2 className="display">Masuk ke akun</h2>
-            <p>Masuk dengan Google atau gunakan email dan kata sandi.</p>
+            <h2 className="display">{isRegistering ? 'Buat akun' : 'Masuk ke akun'}</h2>
+            <p>{isRegistering ? 'Isi data untuk membuat akun Pride.' : 'Masuk dengan Google atau gunakan email dan kata sandi.'}</p>
           </div>
 
           {plan && (
             <div className="auth-login__plan">
               <span>LANJUTKAN PESANAN</span>
-              <strong>Paket {plan}</strong>
+              <strong>Paket {planName}</strong>
             </div>
           )}
 
           <form className="auth-login__form" onSubmit={onSubmit}>
+            {isRegistering && (
+              <div className="field">
+                <label htmlFor="register-name">Nama</label>
+                <input
+                  id="register-name"
+                  className="input"
+                  type="text"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                  minLength={2}
+                />
+              </div>
+            )}
             <div className="field">
               <label htmlFor="login-email">Email</label>
               <input
@@ -170,11 +190,12 @@ export default function Login() {
                 className="input"
                 type="password"
                 name="password"
-                autoComplete="current-password"
+                autoComplete={isRegistering ? 'new-password' : 'current-password'}
                 placeholder="Masukkan kata sandi"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
+                minLength={isRegistering ? 6 : undefined}
               />
             </div>
 
@@ -185,7 +206,7 @@ export default function Login() {
             )}
 
             <Button type="submit" variant="primary" block disabled={busy}>
-              {busy ? 'Memeriksa…' : plan ? 'Masuk & lanjutkan' : 'Masuk'}
+              {busy ? 'Memproses…' : isRegistering ? 'Buat akun & lanjutkan' : plan ? 'Masuk & lanjutkan' : 'Masuk'}
             </Button>
           </form>
 
@@ -209,7 +230,11 @@ export default function Login() {
           )}
 
           <p className="auth-login__help">
-            Belum bisa masuk? <Link to="/bantuan">Hubungi Bantuan</Link>
+            {isRegistering ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
+            <Link to={`${isRegistering ? '/masuk' : '/masuk?daftar=1'}${plan ? `${isRegistering ? '?' : '&'}paket=${encodeURIComponent(plan)}` : ''}`}>
+              {isRegistering ? 'Masuk' : 'Buat akun'}
+            </Link>
+            {' · '}<Link to="/bantuan">Hubungi Bantuan</Link>
           </p>
         </div>
       </section>

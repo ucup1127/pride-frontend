@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import PackageGate from '../components/PackageGate';
 import { findTemplate } from '../data/templates';
 
 // Contoh musik latar untuk preview. Untuk produksi, ganti URL dengan file audio
@@ -17,10 +16,10 @@ const MUSIC = [
   { id: 'golden-8', name: 'Golden Hour', mood: 'Hangat · Cinematic', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3' },
 ];
 
-export default function EditorTemplate() {
+export default function EditorTemplate({ packageAccess }) {
   const [params] = useSearchParams();
-  const template = findTemplate(params.get('template'));
-  const plan = localStorage.getItem('pride-paid-plan');
+  const template = findTemplate(params.get('template')) || findTemplate('aurelia');
+  const plan = packageAccess?.package?.name || 'Paket aktif';
   const [form, setForm] = useState({ title: template.names, date: template.date, location: 'Nama lokasi acara', message: 'Dengan penuh kebahagiaan, kami mengundang Anda.' });
   const [color, setColor] = useState(template.bg);
   const [musicId, setMusicId] = useState(MUSIC[0].id);
@@ -31,8 +30,6 @@ export default function EditorTemplate() {
   useEffect(() => {
     setSaved(false);
   }, [form, color, musicId, musicEnabled]);
-
-  if (!plan) return <Layout><PackageGate eyebrow="MULAI DARI PAKET" title="Pilih paket untuk membuka editor." description="Tentukan paketmu dan selesaikan pembayaran sebelum mengatur detail undangan." /></Layout>;
 
   return <Layout>
     <section className="container page-head editor-page-head">

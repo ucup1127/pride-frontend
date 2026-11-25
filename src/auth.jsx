@@ -51,6 +51,9 @@ export const useAuth = () => useContext(AuthContext);
 export function RequireAuth({ children }) {
   const { session } = useAuth();
   const location = useLocation();
-  if (!session) return <Navigate to="/masuk" replace state={{ from: location.pathname }} />;
+  if (!session) {
+    const from = `${location.pathname}${location.search}`;
+    return <Navigate to="/masuk" replace state={{ from }} />;
+  }
   return children;
 }

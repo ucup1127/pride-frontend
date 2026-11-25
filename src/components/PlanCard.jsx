@@ -5,19 +5,23 @@ export default function PlanCard({ plan }) {
     <article className={`plan-card${plan.featured ? ' plan-card--featured' : ''}`}>
       <div>
         <div className="plan-card__name">{plan.name}</div>
-        <div className="plan-card__price">{plan.price}</div>
+        <div className="plan-card__price">{new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0,
+        }).format(plan.price)}</div>
       </div>
       <ul className="plan-card__items">
-        {plan.items.map((item) => (
+        {plan.features.map((item) => (
           <li key={item}>{item}</li>
         ))}
       </ul>
       <Button
-        to={`/masuk?paket=${plan.name}`}
+        to={`/paket?paket=${plan.id}`}
         variant={plan.featured ? 'light' : 'outline'}
         block
       >
-        Pilih paket &amp; lanjut ke pembayaran
+        Lihat paket
       </Button>
     </article>
   );

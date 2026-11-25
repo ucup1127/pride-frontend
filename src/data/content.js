@@ -28,12 +28,6 @@ export const STEPS = [
   { no: '4', title: 'Bagikan & pantau', text: 'Kirim tautan lewat Instagram dan lihat konfirmasi tamu di dashboard.' },
 ];
 
-export const PLANS = [
-  { name: 'Basic', price: 'Rp [HARGA]', items: ['1 template pilihan', 'Informasi acara & peta', 'RSVP dasar', 'Masa aktif [DURASI]'], featured: false },
-  { name: 'Standard', price: 'Rp [HARGA]', items: ['Semua fitur Basic', 'Galeri foto & musik', 'Nama tamu personal', 'Ucapan & doa', 'Masa aktif [DURASI]'], featured: true },
-  { name: 'Premium', price: 'Rp [HARGA]', items: ['Semua fitur Standard', 'Domain pribadi', 'Amplop digital', 'Prioritas bantuan', 'Masa aktif [DURASI]'], featured: false },
-];
-
 export const FAQS = [
   { q: 'Bagaimana cara memesan?', a: 'Pilih paket, lalu masuk ke akun Pride menggunakan email dan kata sandi. Jika belum memiliki akun, hubungi tim Pride melalui halaman Bantuan.' },
   { q: 'Apakah undangan bisa diubah setelah dibagikan?', a: 'Bisa. Perubahan data langsung tampil di tautan yang sama.' },

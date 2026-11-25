@@ -10,22 +10,12 @@ const MENU = [
   { id: 'ucapan-rsvp', label: 'Ucapan & RSVP', number: '04', to: '/dashboard#ucapan-rsvp' },
 ];
 
-const PLAN_NAMES = {
-  basic: 'Basic',
-  plus: 'Standard',
-  standard: 'Standard',
-  premium: 'Premium',
-};
-
-export default function DashboardShell({ activeMenu, children }) {
+export default function DashboardShell({ activeMenu, children, planName = 'Paket aktif' }) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const cancelLogoutRef = useRef(null);
-  const paidPlan = localStorage.getItem('pride-paid-plan');
-  const planName = PLAN_NAMES[paidPlan] || paidPlan || 'Paket aktif';
-
   useEffect(() => {
     if (!confirmLogout) return undefined;
     cancelLogoutRef.current?.focus();

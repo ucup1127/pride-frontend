@@ -4,7 +4,8 @@ import Button from '../components/Button';
 import SectionHeading from '../components/SectionHeading';
 import TemplateCard from '../components/TemplateCard';
 import PlanCard from '../components/PlanCard';
-import { FEATURES, PLANS, STEPS } from '../data/content';
+import { FEATURES, STEPS } from '../data/content';
+import { PACKAGES } from '../data/packages';
 import { FEATURED_IDS, TEMPLATES } from '../data/templates';
 
 const MOMENT_DATA = {
@@ -306,7 +307,7 @@ export default function Home() {
             text="Pilih paket, selesaikan pembayaran, lalu lanjutkan ke editor template. Untuk bantuan, hubungi kami melalui Instagram @bypride.studio."
           />
           <div className="grid grid--3 grid--stretch">
-            {PLANS.map((p) => (
+            {PACKAGES.map((p) => (
               <PlanCard key={p.name} plan={p} />
             ))}
           </div>

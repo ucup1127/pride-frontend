@@ -91,7 +91,7 @@ function guestStatus(status) {
   }[status] || { label: status || 'Belum konfirmasi', className: 'status--wait' };
 }
 
-export default function Guests() {
+export default function Guests({ packageAccess }) {
   const [invitations, setInvitations] = useState([]);
   const [selectedId, setSelectedId] = useState('');
   const [guests, setGuests] = useState([]);
@@ -361,7 +361,7 @@ export default function Guests() {
   };
 
   return (
-    <DashboardShell activeMenu="daftar-tamu">
+    <DashboardShell activeMenu="daftar-tamu" planName={packageAccess?.package?.name || 'Paket aktif'}>
       <header className="dash__top guests__top">
         <div>
           <div className="eyebrow">KEHADIRAN · {guests.length} TAMU</div>
