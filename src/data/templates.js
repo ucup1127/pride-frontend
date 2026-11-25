@@ -1,6 +1,6 @@
 // Daftar template per kategori. Setiap template punya foto sesuai kategori.
 export const CATEGORY_COUNTS={
-  'Pernikahan':12,
+  'Pernikahan':13,
   'Ulang tahun':10,
   'Wisuda':10,
   'Sempro/Semhas':10,
@@ -14,6 +14,7 @@ export const CATEGORIES=['Semua',...Object.keys(CATEGORY_COUNTS)];
 // Foto per kategori (Unsplash)
 const PHOTOS={
   'Pernikahan':[
+   'https://githubusercontent.com',
     'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=900&fit=crop&q=80',
     'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&h=900&fit=crop&q=80',
     'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&h=900&fit=crop&q=80',
